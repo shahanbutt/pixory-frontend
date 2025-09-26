@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Navigation() {
   const [showLabels, setShowLabels] = useState(true)
+  const pathname = usePathname()
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -19,6 +21,12 @@ export default function Navigation() {
 
     fetchSettings()
   }, [])
+
+  const isActive = (path: string) => {
+    if (path === '/' && pathname === '/') return true
+    if (path === '/shop-all' && pathname === '/shop-all') return true
+    return false
+  }
   return (
     <nav className="px-6 py-4 border-b border-gray-200 relative">
       <div className="max-w-7xl mx-auto">
@@ -26,10 +34,38 @@ export default function Navigation() {
         <div className="hidden md:flex items-center justify-between">
           {/* Left side - Navigation links */}
           <div className="flex items-center space-x-8">
-            <a href="/" className="text-gray-600 hover:text-black transition-colors">Home</a>
-            <a href="/shop-all" className="text-gray-600 hover:text-black transition-colors">Shop All</a>
-            <a href="/#about" className="text-gray-600 hover:text-black transition-colors">About</a>
-            <a href="/#faq" className="text-gray-600 hover:text-black transition-colors">FAQ</a>
+            <a 
+              href="/" 
+              className={`transition-colors ${
+                isActive('/') 
+                  ? 'text-black font-bold' 
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              Home
+            </a>
+            <a 
+              href="/shop-all" 
+              className={`transition-colors ${
+                isActive('/shop-all') 
+                  ? 'text-black font-bold' 
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              Shop All
+            </a>
+            <a 
+              href="/#about" 
+              className="text-gray-600 hover:text-black transition-colors"
+            >
+              About
+            </a>
+            <a 
+              href="/#faq" 
+              className="text-gray-600 hover:text-black transition-colors"
+            >
+              FAQ
+            </a>
           </div>
 
           {/* Center - Logo */}

@@ -89,6 +89,26 @@ export default function ProductHero() {
     loadProductImages()
   }, [])
 
+  // Load dropdown options from file
+  useEffect(() => {
+    const loadDropdownOptions = async () => {
+      try {
+        const response = await fetch('/data/dropdown-options.json')
+        const data = await response.json()
+        setDropdownOptions(data.coverTemplates)
+      } catch (error) {
+        console.error('Error loading dropdown options:', error)
+        // Fallback to default options
+        setDropdownOptions([
+          { label: 'Standard Template', value: 'standard' },
+          { label: 'Start from Scratch', value: 'scratch' }
+        ])
+      }
+    }
+
+    loadDropdownOptions()
+  }, [])
+
   const pageOptions = [
     { pages: 24, price: '199 AED' },
     { pages: 34, price: '299 AED' },
@@ -97,6 +117,11 @@ export default function ProductHero() {
   ]
 
   const [selectedPageOption, setSelectedPageOption] = useState(0)
+  const [selectedDropdownOption, setSelectedDropdownOption] = useState(0)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [dropdownOptions, setDropdownOptions] = useState([
+    { label: 'Loading...', value: 'loading' }
+  ])
 
   const nextImage = () => {
     setSelectedImageIndex((prev) => (prev + 1) % productImages.length)
@@ -161,6 +186,7 @@ export default function ProductHero() {
                 ))}
               </div>
             )}
+
           </div>
 
           {/* Right Section - Product Details */}
@@ -189,9 +215,75 @@ export default function ProductHero() {
             </div>
 
 
+            {/* Dropdown */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Choose your cover template or start from scratch
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  className="w-full bg-white border border-gray-300 rounded-lg py-4 px-8 text-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center justify-center relative"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  <img 
+                    src={dropdownOptions[selectedDropdownOption].image} 
+                    alt={dropdownOptions[selectedDropdownOption].label}
+                    className="w-8 h-8 object-cover rounded mr-3"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                  <span className="block truncate text-lg font-bold">
+                    {dropdownOptions[selectedDropdownOption].label}
+                  </span>
+                  <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </button>
+                
+                {isDropdownOpen && (
+                  <div className={`absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md py-1 text-base border border-black focus:outline-none ${
+                    dropdownOptions.length > 10 ? 'max-h-[480px] overflow-auto' : ''
+                  }`}>
+                    {dropdownOptions.map((option, index) => (
+                      <div key={index}>
+                        <button
+                          className={`w-full py-4 px-8 text-lg hover:bg-gray-100 flex items-center relative ${
+                            selectedDropdownOption === index ? 'bg-blue-50 text-blue-600' : 'text-gray-900'
+                          }`}
+                          onClick={() => {
+                            setSelectedDropdownOption(index)
+                            setIsDropdownOpen(false)
+                          }}
+                        >
+                          <img 
+                            src={option.image} 
+                            alt={option.label}
+                            className="w-8 h-8 object-cover rounded flex-shrink-0"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                          <span className="font-bold ml-3 truncate">
+                            {option.label}
+                          </span>
+                        </button>
+                        {index < dropdownOptions.length - 1 && (
+                          <div className="w-full h-px bg-black"></div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button className="w-full bg-gray-100 text-black py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-200 transition-colors">
+              <button className="w-full bg-black text-white py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors">
                 Start Your Design
               </button>
             </div>
