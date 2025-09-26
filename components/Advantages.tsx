@@ -20,7 +20,7 @@ export default function Advantages() {
     fetchSettings()
   }, [])
   return (
-    <section className="py-12 md:py-20 px-4 md:px-6 relative bg-gray-100">
+    <section id="about" className="py-12 md:py-20 px-4 md:px-6 relative bg-gray-100">
       <div className="max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left Section - Photobook Image */}
