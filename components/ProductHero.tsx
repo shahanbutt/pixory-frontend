@@ -38,50 +38,47 @@ export default function ProductHero() {
       try {
         const selectedProduct = dropdownOptions[selectedDropdownOption]
         const productFolder = selectedProduct.value.toLowerCase().replace(/\s+/g, '-')
-        const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
-        const images: string[] = []
         
-        // Check for images in the specific product folder
-        for (let i = 1; i <= 20; i++) { // Check up to 20 images
-          for (const ext of imageExtensions) {
-            const imagePath = `/images/shop-all/product-hero/${productFolder}/product-${i}${ext}`
-            try {
-              // Create a test image element to check if the image exists
-              const img = new Image()
-              await new Promise((resolve, reject) => {
-                img.onload = () => resolve(true)
-                img.onerror = () => reject(false)
-                img.src = imagePath
-              })
-              images.push(imagePath)
-              break // Found an image with this number, move to next number
-            } catch {
-              // Image doesn't exist, continue to next extension
-            }
-          }
+        // Predefined image paths for each product to avoid slow loading checks
+        const productImageMap: { [key: string]: string[] } = {
+          'summer-1': [
+            `/images/shop-all/product-hero/summer-1/product-1.jpg`,
+            `/images/shop-all/product-hero/summer-1/product-2.jpg`,
+            `/images/shop-all/product-hero/summer-1/product-3.jpg`,
+            `/images/shop-all/product-hero/summer-1/product-4.jpg`,
+            `/images/shop-all/product-hero/summer-1/product-5.jpg`
+          ],
+          'amalfi': [
+            `/images/shop-all/product-hero/amalfi/product-1.jpg`,
+            `/images/shop-all/product-hero/amalfi/product-2.jpg`,
+            `/images/shop-all/product-hero/amalfi/product-3.jpg`,
+            `/images/shop-all/product-hero/amalfi/product-4.jpg`,
+            `/images/shop-all/product-hero/amalfi/product-5.jpg`
+          ],
+          'algarve': [
+            `/images/shop-all/product-hero/algarve/product-1.jpg`,
+            `/images/shop-all/product-hero/algarve/product-2.jpg`,
+            `/images/shop-all/product-hero/algarve/product-3.jpg`,
+            `/images/shop-all/product-hero/algarve/product-4.jpg`,
+            `/images/shop-all/product-hero/algarve/product-5.jpg`
+          ],
+          'summer-2': [
+            `/images/shop-all/product-hero/summer-2/product-1.jpg`,
+            `/images/shop-all/product-hero/summer-2/product-2.jpg`,
+            `/images/shop-all/product-hero/summer-2/product-3.jpg`,
+            `/images/shop-all/product-hero/summer-2/product-4.jpg`,
+            `/images/shop-all/product-hero/summer-2/product-5.jpg`
+          ],
+          'paris': [
+            `/images/shop-all/product-hero/paris/product-1.jpg`,
+            `/images/shop-all/product-hero/paris/product-2.jpg`,
+            `/images/shop-all/product-hero/paris/product-3.jpg`,
+            `/images/shop-all/product-hero/paris/product-4.jpg`,
+            `/images/shop-all/product-hero/paris/product-5.jpg`
+          ]
         }
         
-        // If no numbered images found, try alternative naming patterns
-        if (images.length === 0) {
-          const alternativeNames = ['main', 'hero', 'product', 'book', 'cover', 'image']
-          for (const name of alternativeNames) {
-            for (const ext of imageExtensions) {
-              const imagePath = `/images/shop-all/product-hero/${productFolder}/${name}${ext}`
-              try {
-                const img = new Image()
-                await new Promise((resolve, reject) => {
-                  img.onload = () => resolve(true)
-                  img.onerror = () => reject(false)
-                  img.src = imagePath
-                })
-                images.push(imagePath)
-                break
-              } catch {
-                // Image doesn't exist, continue
-              }
-            }
-          }
-        }
+        const images = productImageMap[productFolder] || []
         
         if (images.length > 0) {
           setProductImages(images)
