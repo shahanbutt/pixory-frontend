@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 
 export default function ProductHero() {
   const [showLabels, setShowLabels] = useState(true)
-  const [quantity, setQuantity] = useState(1)
+  const [productImages, setProductImages] = useState<string[]>([])
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -21,17 +22,92 @@ export default function ProductHero() {
     fetchSettings()
   }, [])
 
+  // Load product images from the product-hero folder
+  useEffect(() => {
+    const loadProductImages = async () => {
+      try {
+        // Try to load images dynamically by checking if they exist
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
+        const images: string[] = []
+        
+        // Check for images with common naming patterns
+        for (let i = 1; i <= 20; i++) { // Check up to 20 images
+          for (const ext of imageExtensions) {
+            const imagePath = `/images/shop-all/product-hero/product-${i}${ext}`
+            try {
+              // Create a test image element to check if the image exists
+              const img = new Image()
+              await new Promise((resolve, reject) => {
+                img.onload = () => resolve(true)
+                img.onerror = () => reject(false)
+                img.src = imagePath
+              })
+              images.push(imagePath)
+              break // Found an image with this number, move to next number
+            } catch {
+              // Image doesn't exist, continue to next extension
+            }
+          }
+        }
+        
+        // If no numbered images found, try alternative naming patterns
+        if (images.length === 0) {
+          const alternativeNames = ['main', 'hero', 'product', 'book', 'cover']
+          for (const name of alternativeNames) {
+            for (const ext of imageExtensions) {
+              const imagePath = `/images/shop-all/product-hero/${name}${ext}`
+              try {
+                const img = new Image()
+                await new Promise((resolve, reject) => {
+                  img.onload = () => resolve(true)
+                  img.onerror = () => reject(false)
+                  img.src = imagePath
+                })
+                images.push(imagePath)
+                break
+              } catch {
+                // Image doesn't exist, continue
+              }
+            }
+          }
+        }
+        
+        if (images.length > 0) {
+          setProductImages(images)
+        } else {
+          // Fallback to a default image if no images found
+          console.warn('No product images found in /images/shop-all/product-hero/')
+          setProductImages(['/images/shop-all/product-hero/default.jpg'])
+        }
+      } catch (error) {
+        console.error('Error loading product images:', error)
+        // Fallback to a single image
+        setProductImages(['/images/shop-all/product-hero/product-1.jpg'])
+      }
+    }
+
+    loadProductImages()
+  }, [])
+
   const pageOptions = [
-    { pages: 24, price: '200 AED' },
-    { pages: 34, price: '300 AED' },
-    { pages: 44, price: '400 AED' },
-    { pages: 54, price: '500 AED' }
+    { pages: 24, price: '199 AED' },
+    { pages: 34, price: '299 AED' },
+    { pages: 44, price: '399 AED' },
+    { pages: 54, price: '499 AED' }
   ]
 
   const [selectedPageOption, setSelectedPageOption] = useState(0)
 
+  const nextImage = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % productImages.length)
+  }
+
+  const prevImage = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length)
+  }
+
   return (
-    <section className="py-12 md:py-20 px-4 md:px-6 bg-white relative">
+    <section className="py-12 md:py-20 px-4 md:px-6 bg-gray-100 relative">
       <div className="max-w-7xl mx-auto">
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -39,35 +115,52 @@ export default function ProductHero() {
           <div className="space-y-6">
             {/* Main Product Image */}
             <div className="relative">
-              <img 
-                src="/images/dubai-min.jpg" 
-                alt="Custom Photobook - Paris 2023"
-                className="w-full max-w-md mx-auto h-96 object-cover rounded-lg shadow-lg"
-              />
+              {productImages.length > 0 && (
+                <img 
+                  src={productImages[selectedImageIndex]} 
+                  alt={`Custom Travel Book - View ${selectedImageIndex + 1}`}
+                  className="w-full max-w-md mx-auto h-96 object-cover rounded-lg shadow-lg"
+                />
+              )}
               {/* Navigation arrows */}
-              <button className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
+              {productImages.length > 1 && (
+                <>
+                  <button 
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button 
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full p-2 shadow-md hover:bg-gray-50"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Thumbnail Images */}
-            <div className="flex justify-center space-x-2">
-              {[1, 2, 3, 4].map((index) => (
-                <img 
-                  key={index}
-                  src="/images/dubai-min.jpg" 
-                  alt={`Product view ${index}`}
-                  className="w-16 h-16 object-cover rounded cursor-pointer hover:opacity-75"
-                />
-              ))}
-            </div>
+            {productImages.length > 1 && (
+              <div className="flex justify-center space-x-2">
+                {productImages.map((image, index) => (
+                  <img 
+                    key={index}
+                    src={image} 
+                    alt={`Product view ${index + 1}`}
+                    className={`w-16 h-16 object-cover rounded cursor-pointer hover:opacity-75 transition-opacity ${
+                      selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
+                    }`}
+                    onClick={() => setSelectedImageIndex(index)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Right Section - Product Details */}
@@ -95,31 +188,9 @@ export default function ProductHero() {
               </div>
             </div>
 
-            {/* Quantity Selector */}
-            <div className="flex items-center space-x-4">
-              <label className="text-gray-700 font-medium">Quantity:</label>
-              <div className="flex items-center border border-gray-300 rounded">
-                <button 
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="px-3 py-2 hover:bg-gray-50"
-                >
-                  -
-                </button>
-                <span className="px-4 py-2 border-x border-gray-300">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="px-3 py-2 hover:bg-gray-50"
-                >
-                  +
-                </button>
-              </div>
-            </div>
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button className="w-full bg-black text-white py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors">
-                Add to Cart
-              </button>
               <button className="w-full bg-gray-100 text-black py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-200 transition-colors">
                 Start Your Design
               </button>

@@ -92,7 +92,7 @@ export default function ProductShowcase() {
                     {product.features.map((feature, index) => (
                       <li key={index} className="flex items-center text-sm text-gray-600">
                         <img 
-                          src="/images/ShieldCheck.jpg" 
+                          src="/images/home-page/ShieldCheck.jpg" 
                           alt="Check" 
                           className="w-4 h-4 mr-2 object-contain"
                         />

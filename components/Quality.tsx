@@ -26,7 +26,7 @@ export default function Quality() {
           {/* Left Section - Stacked Photobooks Image */}
           <div className="flex justify-center md:justify-start order-1 md:order-1">
             <img 
-              src="/images/Beautiful quality.jpg" 
+              src="/images/home-page/Beautiful quality.jpg" 
               alt="Beautiful Quality Photobooks"
               className="w-full max-w-md md:max-w-lg h-auto object-cover rounded-lg"
             />

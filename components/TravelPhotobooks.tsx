@@ -21,59 +21,73 @@ export default function TravelPhotobooks() {
   }, [])
 
   return (
-    <section className="py-12 md:py-20 px-4 md:px-6 bg-white relative">
+    <section className="py-12 md:py-20 px-4 md:px-6 bg-gray-100 relative">
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Section - Content */}
-          <div>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black mb-6">
-              Travel photobooks that transport you back
+        {/* Top Section - Title and Description */}
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start mb-12 md:mb-20">
+          {/* Left - Main Heading */}
+          <div className="text-center md:text-left">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-black mb-6 md:mb-8 leading-tight">
+              it's easy as 1, 2, 3 to create your photobook
             </h2>
-            
-            <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
-              Every journey tells a story. Our travel photobooks capture the essence of your adventures, 
-              preserving those precious moments that make travel so special. From bustling city streets 
-              to serene beach sunsets, transform your photos into a beautiful keepsake that will last a lifetime.
+          </div>
+          
+          {/* Right - Description */}
+          <div className="text-center md:text-left">
+            <p className="text-base md:text-lg text-black leading-relaxed">
+              With PrintiQue, you can easily transform your holiday photos into a stunning photobook that captures the essence of your journey. Simply upload your images, customize the layout, and add captions to create a unique keepsake that will transport you back to those special moments.
             </p>
+          </div>
+        </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <img src="/images/ShieldCheck.jpg" alt="Check" className="w-5 h-5" />
-                <span className="text-gray-700">Premium quality materials</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <img src="/images/ShieldCheck.jpg" alt="Check" className="w-5 h-5" />
-                <span className="text-gray-700">Professional printing</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <img src="/images/ShieldCheck.jpg" alt="Check" className="w-5 h-5" />
-                <span className="text-gray-700">Easy customization</span>
-              </div>
+        {/* Bottom Section - Three Steps */}
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+          {/* Step 1 - Choose Your Template */}
+          <div className="text-center">
+            <div className="mb-6 md:mb-8">
+              <img 
+                src="/images/home-page/templage.jpg" 
+                alt="Choose Your Template"
+                className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
+              />
             </div>
-
-            <div className="mt-8">
-              <button className="bg-black text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors">
-                Start Your Travel Book
-              </button>
-            </div>
+            
+            <h3 className="text-lg md:text-xl font-bold text-black mb-3 md:mb-4">1. CHOOSE YOUR TEMPLATE</h3>
+            <p className="text-black leading-relaxed text-sm md:text-base">
+              You can fully customize every template in our easy to use editor online! No app needed!
+            </p>
           </div>
 
-          {/* Right Section - Image */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative">
+          {/* Step 2 - Upload Your Photos */}
+          <div className="text-center">
+            <div className="mb-6 md:mb-8">
               <img 
-                src="/images/emotionalessence.jpg" 
-                alt="Open travel photobook showing beach memories"
-                className="w-full max-w-md rounded-lg shadow-xl"
+                src="/images/home-page/autocreate.jpg" 
+                alt="Upload Your Photos"
+                className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
               />
-              {/* Floating elements to show the book is open */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-lg shadow-lg p-3">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded"></div>
-              </div>
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-lg shadow-lg p-3">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded"></div>
-              </div>
             </div>
+            
+            <h3 className="text-lg md:text-xl font-bold text-black mb-3 md:mb-4">2. UPLOAD YOUR PHOTOS</h3>
+            <p className="text-black leading-relaxed text-sm md:text-base">
+              We'll instantly organize your photos into a cohesive, well-designed story. You can also use Auto Create for faster uploads!
+            </p>
+          </div>
+
+          {/* Step 3 - Customize Your Book */}
+          <div className="text-center sm:col-span-2 md:col-span-1">
+            <div className="mb-6 md:mb-8">
+              <img 
+                src="/images/home-page/customize.jpg" 
+                alt="Customize Your Book"
+                className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
+              />
+            </div>
+            
+            <h3 className="text-lg md:text-xl font-bold text-black mb-3 md:mb-4">3. CUSTOMIZE YOUR BOOK</h3>
+            <p className="text-black leading-relaxed text-sm md:text-base">
+              Easily change fonts, backgrounds, colors, shapes, stickers, and more to make it truly yours and memorable!
+            </p>
           </div>
         </div>
       </div>

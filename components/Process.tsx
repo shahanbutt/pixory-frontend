@@ -45,7 +45,7 @@ export default function Process() {
           <div className="text-center">
             <div className="mb-6 md:mb-8">
               <img 
-                src="/images/templage.jpg" 
+                src="/images/home-page/templage.jpg" 
                 alt="Choose Your Template"
                 className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
               />
@@ -61,7 +61,7 @@ export default function Process() {
           <div className="text-center">
             <div className="mb-6 md:mb-8">
               <img 
-                src="/images/autocreate.jpg" 
+                src="/images/home-page/autocreate.jpg" 
                 alt="Upload Your Photos"
                 className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
               />
@@ -77,7 +77,7 @@ export default function Process() {
           <div className="text-center sm:col-span-2 md:col-span-1">
             <div className="mb-6 md:mb-8">
               <img 
-                src="/images/customize.jpg" 
+                src="/images/home-page/customize.jpg" 
                 alt="Customize Your Book"
                 className="w-full max-w-sm mx-auto h-auto object-cover rounded-lg"
               />

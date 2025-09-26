@@ -2,9 +2,7 @@ import Navigation from '@/components/Navigation'
 import ProductHero from '@/components/ProductHero'
 import HowItWorks from '@/components/HowItWorks'
 import TravelPhotobooks from '@/components/TravelPhotobooks'
-import DestinationStories from '@/components/DestinationStories'
 import TrustpilotRating from '@/components/TrustpilotRating'
-import CustomerReviews from '@/components/CustomerReviews'
 import Footer from '@/components/Footer'
 
 export default function ShopAll() {
@@ -14,9 +12,7 @@ export default function ShopAll() {
       <ProductHero />
       <HowItWorks />
       <TravelPhotobooks />
-      <DestinationStories />
       <TrustpilotRating />
-      <CustomerReviews />
       <Footer />
     </main>
   )

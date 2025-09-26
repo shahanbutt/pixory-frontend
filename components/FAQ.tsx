@@ -105,7 +105,7 @@ export default function FAQ() {
           {/* Right Section - FAQ Image */}
           <div className="flex justify-center md:justify-end order-1 md:order-2">
             <img 
-              src="/images/faq.jpg" 
+              src="/images/home-page/faq.jpg" 
               alt="130+ Customisable Designs"
               className="w-full max-w-md md:max-w-lg h-auto object-cover rounded-lg"
             />

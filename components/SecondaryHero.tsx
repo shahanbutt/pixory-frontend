@@ -46,7 +46,7 @@ export default function SecondaryHero() {
           {/* Right Section - Image */}
           <div className="flex justify-center md:justify-end order-1 md:order-2">
             <img 
-              src="/images/secondary-hero.jpg" 
+              src="/images/home-page/secondary-hero.jpg" 
               alt="Beautiful photobook showcasing travel memories"
               className="rounded-lg shadow-lg max-w-full h-auto w-full max-w-md md:max-w-lg"
             />

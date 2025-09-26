@@ -26,7 +26,7 @@ export default function Advantages() {
           {/* Left Section - Photobook Image */}
           <div className="flex justify-center md:justify-start order-1 md:order-1">
             <img 
-              src="/images/secondary-hero.jpg" 
+              src="/images/home-page/secondary-hero.jpg" 
               alt="Beautiful photobook showcasing travel memories"
               className="rounded-lg shadow-lg max-w-full h-auto w-full max-w-md md:max-w-lg"
             />
@@ -43,7 +43,7 @@ export default function Advantages() {
                   <div className="flex-shrink-0 mx-auto sm:mx-0">
                     <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
                       <img 
-                        src="/images/emotionalessence.jpg" 
+                        src="/images/home-page/emotionalessence.jpg" 
                         alt="Emotional Essence and Keepsakes"
                         className="w-12 h-12 md:w-16 md:h-16 object-cover rounded"
                       />
@@ -62,7 +62,7 @@ export default function Advantages() {
                   <div className="flex-shrink-0 mx-auto sm:mx-0">
                     <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
                       <img 
-                        src="/images/meticulous-craftsmanship.jpg" 
+                        src="/images/home-page/meticulous-craftsmanship.jpg" 
                         alt="Meticulous Craftsmanship"
                         className="w-12 h-12 md:w-16 md:h-16 object-cover rounded"
                       />
@@ -81,7 +81,7 @@ export default function Advantages() {
                   <div className="flex-shrink-0 mx-auto sm:mx-0">
                     <div className="w-12 h-12 md:w-16 md:h-16 flex items-center justify-center">
                       <img 
-                        src="/images/highly-rate.jpg" 
+                        src="/images/home-page/highly-rate.jpg" 
                         alt="Highly Rated and Trusted"
                         className="w-12 h-12 md:w-16 md:h-16 object-cover rounded"
                       />

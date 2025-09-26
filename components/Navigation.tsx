@@ -41,14 +41,14 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             <button className="hover:opacity-80 transition-opacity">
               <img 
-                src="/images/user.jpg" 
+                src="/images/home-page/user.jpg" 
                 alt="My Account" 
                 className="w-6 h-6 object-cover"
               />
             </button>
             <button className="hover:opacity-80 transition-opacity">
               <img 
-                src="/images/shopping-cart.jpg" 
+                src="/images/home-page/shopping-cart.jpg" 
                 alt="Shopping Cart" 
                 className="w-6 h-6 object-cover"
               />
@@ -77,14 +77,14 @@ export default function Navigation() {
           <div className="flex items-center space-x-2">
             <button className="hover:opacity-80 transition-opacity p-1">
               <img 
-                src="/images/user.jpg" 
+                src="/images/home-page/user.jpg" 
                 alt="My Account" 
                 className="w-5 h-5 object-cover"
               />
             </button>
             <button className="hover:opacity-80 transition-opacity p-1">
               <img 
-                src="/images/shopping-cart.jpg" 
+                src="/images/home-page/shopping-cart.jpg" 
                 alt="Shopping Cart" 
                 className="w-5 h-5 object-cover"
               />

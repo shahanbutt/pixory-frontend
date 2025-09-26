@@ -23,7 +23,7 @@ export default function Hero() {
     <section 
       className="py-12 md:py-20 px-4 md:px-6 relative bg-no-repeat bg-center flex items-center"
       style={{
-        backgroundImage: "url('/images/hero-background.jpg')",
+        backgroundImage: "url('/images/home-page/hero-background.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center center",
         height: "60vh",

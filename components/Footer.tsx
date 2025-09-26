@@ -28,7 +28,7 @@ export default function Footer() {
           <div className="text-center">
             <div className="flex justify-center mb-4 md:mb-6">
               <img 
-                src="/images/Truck.jpg" 
+                src="/images/home-page/Truck.jpg" 
                 alt="Fast Shipping"
                 className="w-12 h-12 md:w-16 md:h-16 object-contain"
               />
@@ -43,7 +43,7 @@ export default function Footer() {
           <div className="text-center">
             <div className="flex justify-center mb-4 md:mb-6">
               <img 
-                src="/images/ShieldCheck.jpg" 
+                src="/images/home-page/ShieldCheck.jpg" 
                 alt="100% Satisfaction Guarantee"
                 className="w-12 h-12 md:w-16 md:h-16 object-contain"
               />
@@ -58,7 +58,7 @@ export default function Footer() {
           <div className="text-center sm:col-span-2 md:col-span-1">
             <div className="flex justify-center mb-4 md:mb-6">
               <img 
-                src="/images/Star.jpg" 
+                src="/images/home-page/Star.jpg" 
                 alt="100,000+ Happy Customers"
                 className="w-12 h-12 md:w-16 md:h-16 object-contain"
               />
@@ -95,7 +95,7 @@ export default function Footer() {
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="/images/facebook.jpg" 
+                  src="/images/home-page/facebook.jpg" 
                   alt="Facebook" 
                   className="w-full h-full object-cover"
                 />
@@ -109,7 +109,7 @@ export default function Footer() {
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="/images/instagram.jpg" 
+                  src="/images/home-page/instagram.jpg" 
                   alt="Instagram" 
                   className="w-full h-full object-cover"
                 />
@@ -123,7 +123,7 @@ export default function Footer() {
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="/images/whatsapp.jpg" 
+                  src="/images/home-page/whatsapp.jpg" 
                   alt="WhatsApp" 
                   className="w-full h-full object-cover"
                 />
@@ -137,7 +137,7 @@ export default function Footer() {
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="/images/linkedin.jpg" 
+                  src="/images/home-page/linkedin.jpg" 
                   alt="LinkedIn" 
                   className="w-full h-full object-cover"
                 />
@@ -151,7 +151,7 @@ export default function Footer() {
                 className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden hover:opacity-80 transition-opacity"
               >
                 <img 
-                  src="/images/youtube.jpg" 
+                  src="/images/home-page/youtube.jpg" 
                   alt="YouTube" 
                   className="w-full h-full object-cover"
                 />
