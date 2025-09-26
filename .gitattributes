@@ -1,4 +1,41 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# Custom for Visual Studio
+*.cs     diff=csharp
+# Standard to msysgit
+*.doc	 diff=astextplain
+*.DOC	 diff=astextplain
+*.docx diff=astextplain
+*.DOCX diff=astextplain
+*.dot  diff=astextplain
+*.DOT  diff=astextplain
+*.pdf  diff=astextplain
+*.PDF	 diff=astextplain
+*.rtf	 diff=astextplain
+*.RTF	 diff=astextplain
+# Markdown files
+*.md text
+*.MD text
+# JSON files
+*.json text
+*.JSON text
+# YAML files
+*.yml text
+*.yaml text
+# Image files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+# Font files
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+# Archive files
+*.zip binary
+*.tar binary
+*.gz binary
 *.node filter=lfs diff=lfs merge=lfs -text
-node_modules/@next/swc-win32-x64-msvc/next-swc.win32-x64-msvc.node filter=lfs diff=lfs merge=lfs -text

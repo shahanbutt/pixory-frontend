@@ -1,4 +1,25 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
 export default function Testimonials() {
+  const [showLabels, setShowLabels] = useState(true)
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/data/settings.json')
+        const settings = await response.json()
+        setShowLabels(settings.showSectionLabels)
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+        setShowLabels(true)
+      }
+    }
+
+    fetchSettings()
+  }, [])
+
   return (
     <section className="py-20 px-6 bg-gray-50 relative">
       <div className="max-w-7xl mx-auto">
@@ -32,7 +53,9 @@ export default function Testimonials() {
           </div>
         </div>
       </div>
-      <div className="absolute bottom-6 left-6 text-xs font-bold text-black">TESTIMONIALS</div>
+      {showLabels && (
+        <div className="absolute bottom-6 left-6 text-xs font-bold text-black">TESTIMONIALS</div>
+      )}
     </section>
   )
 }
