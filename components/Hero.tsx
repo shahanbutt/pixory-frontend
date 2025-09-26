@@ -40,7 +40,7 @@ export default function Hero() {
         </p>
 
         <div className="flex justify-center mb-8 md:mb-16">
-          <a href="/shop-all" className="bg-black text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-gray-800 transition-colors">
+          <a href="/design" className="bg-black text-white px-6 md:px-8 py-3 md:py-4 rounded-full text-base md:text-lg font-semibold hover:bg-gray-800 transition-colors">
             Start My Design
           </a>
         </div>

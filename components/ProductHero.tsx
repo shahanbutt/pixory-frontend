@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 export default function ProductHero() {
   const [showLabels, setShowLabels] = useState(true)
@@ -287,9 +288,11 @@ export default function ProductHero() {
 
             {/* Action Buttons */}
             <div className="space-y-4">
-              <button className="w-full bg-black text-white py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors">
-                Start Your Design
-              </button>
+              <Link href={`/design?pages=${pageOptions[selectedPageOption].pages}&price=${pageOptions[selectedPageOption].price}`} className="block">
+                <button className="w-full bg-black text-white py-4 px-8 rounded-lg text-lg font-semibold hover:bg-gray-800 transition-colors">
+                  Start Your Design
+                </button>
+              </Link>
             </div>
 
             {/* Page Options */}

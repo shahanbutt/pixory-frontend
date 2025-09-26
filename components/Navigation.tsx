@@ -25,6 +25,7 @@ export default function Navigation() {
   const isActive = (path: string) => {
     if (path === '/' && pathname === '/') return true
     if (path === '/shop-all' && pathname === '/shop-all') return true
+    if (path === '/design' && pathname === '/design') return true
     return false
   }
   return (
@@ -53,6 +54,16 @@ export default function Navigation() {
               }`}
             >
               Shop All
+            </a>
+            <a 
+              href="/design" 
+              className={`transition-colors ${
+                isActive('/design') 
+                  ? 'text-black font-bold' 
+                  : 'text-gray-600 hover:text-black'
+              }`}
+            >
+              Design
             </a>
             <a 
               href="/#about" 
