@@ -22,19 +22,17 @@ export default function ProductHero() {
   }, [])
 
   const pageOptions = [
-    { pages: 100, price: '$29.99' },
-    { pages: 150, price: '$39.99' },
-    { pages: 200, price: '$49.99' },
-    { pages: 300, price: '$69.99' }
+    { pages: 24, price: '200 AED' },
+    { pages: 34, price: '300 AED' },
+    { pages: 44, price: '400 AED' },
+    { pages: 54, price: '500 AED' }
   ]
+
+  const [selectedPageOption, setSelectedPageOption] = useState(0)
 
   return (
     <section className="py-12 md:py-20 px-4 md:px-6 bg-white relative">
       <div className="max-w-7xl mx-auto">
-        {/* Promotional Banner */}
-        <div className="bg-black text-white text-center py-2 mb-8">
-          <p className="text-sm md:text-base">Your first photobook 50% OFF</p>
-        </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Section - Product Images */}
@@ -76,7 +74,7 @@ export default function ProductHero() {
           <div className="space-y-6">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-black mb-4">
-                Custom Photobook
+                Custom Travel Book
               </h1>
               
               {/* Rating */}
@@ -93,7 +91,7 @@ export default function ProductHero() {
 
               {/* Price */}
               <div className="text-3xl font-bold text-black mb-6">
-                $29.99
+                {pageOptions[selectedPageOption].price}
               </div>
             </div>
 
@@ -130,10 +128,30 @@ export default function ProductHero() {
             {/* Page Options */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {pageOptions.map((option, index) => (
-                <div key={index} className="bg-blue-50 p-4 rounded-lg text-center hover:bg-blue-100 cursor-pointer transition-colors">
-                  <div className="text-2xl font-bold text-blue-600">{option.pages}</div>
-                  <div className="text-sm text-gray-600">pages</div>
-                  <div className="text-lg font-semibold text-black">{option.price}</div>
+                <div 
+                  key={index} 
+                  className={`p-4 rounded-lg text-center cursor-pointer transition-colors ${
+                    selectedPageOption === index 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-blue-50 hover:bg-blue-100'
+                  }`}
+                  onClick={() => setSelectedPageOption(index)}
+                >
+                  <div className={`text-2xl font-bold ${
+                    selectedPageOption === index ? 'text-white' : 'text-blue-600'
+                  }`}>
+                    {option.pages}
+                  </div>
+                  <div className={`text-sm ${
+                    selectedPageOption === index ? 'text-blue-100' : 'text-gray-600'
+                  }`}>
+                    pages
+                  </div>
+                  <div className={`text-lg font-semibold ${
+                    selectedPageOption === index ? 'text-white' : 'text-black'
+                  }`}>
+                    {option.price}
+                  </div>
                 </div>
               ))}
             </div>
