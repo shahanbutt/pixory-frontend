@@ -1,22 +1,22 @@
 import Navigation from '@/components/Navigation'
-import SecondaryHero from '@/components/SecondaryHero'
-import ProductShowcase from '@/components/ProductShowcase'
-import ShopFeatures from '@/components/ShopFeatures'
-import Process from '@/components/Process'
-import Quality from '@/components/Quality'
-import Testimonials from '@/components/Testimonials'
+import ProductHero from '@/components/ProductHero'
+import HowItWorks from '@/components/HowItWorks'
+import TravelPhotobooks from '@/components/TravelPhotobooks'
+import DestinationStories from '@/components/DestinationStories'
+import TrustpilotRating from '@/components/TrustpilotRating'
+import CustomerReviews from '@/components/CustomerReviews'
 import Footer from '@/components/Footer'
 
 export default function ShopAll() {
   return (
     <main className="min-h-screen">
       <Navigation />
-      <SecondaryHero />
-      <ProductShowcase />
-      <ShopFeatures />
-      <Process />
-      <Quality />
-      <Testimonials />
+      <ProductHero />
+      <HowItWorks />
+      <TravelPhotobooks />
+      <DestinationStories />
+      <TrustpilotRating />
+      <CustomerReviews />
       <Footer />
     </main>
   )
