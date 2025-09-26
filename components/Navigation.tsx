@@ -28,8 +28,8 @@ export default function Navigation() {
           <div className="flex items-center space-x-8">
             <a href="/" className="text-gray-600 hover:text-black transition-colors">Home</a>
             <a href="/shop-all" className="text-gray-600 hover:text-black transition-colors">Shop All</a>
-            <a href="#about" className="text-gray-600 hover:text-black transition-colors">About</a>
-            <a href="#faq" className="text-gray-600 hover:text-black transition-colors">FAQ</a>
+            <a href="/#about" className="text-gray-600 hover:text-black transition-colors">About</a>
+            <a href="/#faq" className="text-gray-600 hover:text-black transition-colors">FAQ</a>
           </div>
 
           {/* Center - Logo */}
