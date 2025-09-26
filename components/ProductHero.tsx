@@ -6,6 +6,12 @@ export default function ProductHero() {
   const [showLabels, setShowLabels] = useState(true)
   const [productImages, setProductImages] = useState<string[]>([])
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [selectedPageOption, setSelectedPageOption] = useState(0)
+  const [selectedDropdownOption, setSelectedDropdownOption] = useState(0)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [dropdownOptions, setDropdownOptions] = useState([
+    { label: 'Loading...', value: 'loading', image: '' }
+  ])
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -22,18 +28,23 @@ export default function ProductHero() {
     fetchSettings()
   }, [])
 
-  // Load product images from the product-hero folder
+  // Load product images from the selected product's folder
   useEffect(() => {
     const loadProductImages = async () => {
+      if (dropdownOptions.length === 0 || selectedDropdownOption >= dropdownOptions.length) {
+        return
+      }
+
       try {
-        // Try to load images dynamically by checking if they exist
+        const selectedProduct = dropdownOptions[selectedDropdownOption]
+        const productFolder = selectedProduct.value.toLowerCase().replace(/\s+/g, '-')
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp']
         const images: string[] = []
         
-        // Check for images with common naming patterns
+        // Check for images in the specific product folder
         for (let i = 1; i <= 20; i++) { // Check up to 20 images
           for (const ext of imageExtensions) {
-            const imagePath = `/images/shop-all/product-hero/product-${i}${ext}`
+            const imagePath = `/images/shop-all/product-hero/${productFolder}/product-${i}${ext}`
             try {
               // Create a test image element to check if the image exists
               const img = new Image()
@@ -52,10 +63,10 @@ export default function ProductHero() {
         
         // If no numbered images found, try alternative naming patterns
         if (images.length === 0) {
-          const alternativeNames = ['main', 'hero', 'product', 'book', 'cover']
+          const alternativeNames = ['main', 'hero', 'product', 'book', 'cover', 'image']
           for (const name of alternativeNames) {
             for (const ext of imageExtensions) {
-              const imagePath = `/images/shop-all/product-hero/${name}${ext}`
+              const imagePath = `/images/shop-all/product-hero/${productFolder}/${name}${ext}`
               try {
                 const img = new Image()
                 await new Promise((resolve, reject) => {
@@ -74,20 +85,23 @@ export default function ProductHero() {
         
         if (images.length > 0) {
           setProductImages(images)
+          setSelectedImageIndex(0) // Reset to first image when product changes
         } else {
-          // Fallback to a default image if no images found
-          console.warn('No product images found in /images/shop-all/product-hero/')
-          setProductImages(['/images/shop-all/product-hero/default.jpg'])
+          // Fallback to the main product image
+          console.warn(`No images found for product: ${selectedProduct.label}`)
+          setProductImages([selectedProduct.image])
+          setSelectedImageIndex(0)
         }
       } catch (error) {
         console.error('Error loading product images:', error)
-        // Fallback to a single image
-        setProductImages(['/images/shop-all/product-hero/product-1.jpg'])
+        // Fallback to the main product image
+        setProductImages([dropdownOptions[selectedDropdownOption]?.image || '/images/shop-all/product-hero/default.jpg'])
+        setSelectedImageIndex(0)
       }
     }
 
     loadProductImages()
-  }, [])
+  }, [selectedDropdownOption, dropdownOptions])
 
   // Load dropdown options from file
   useEffect(() => {
@@ -115,13 +129,6 @@ export default function ProductHero() {
     { pages: 44, price: '399 AED' },
     { pages: 54, price: '499 AED' }
   ]
-
-  const [selectedPageOption, setSelectedPageOption] = useState(0)
-  const [selectedDropdownOption, setSelectedDropdownOption] = useState(0)
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [dropdownOptions, setDropdownOptions] = useState([
-    { label: 'Loading...', value: 'loading' }
-  ])
 
   const nextImage = () => {
     setSelectedImageIndex((prev) => (prev + 1) % productImages.length)
