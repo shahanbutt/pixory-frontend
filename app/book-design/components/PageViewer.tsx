@@ -153,8 +153,8 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                   selectedPage.content.images.length > 0 ? (
                     <div className="relative overflow-hidden mx-auto border-2 border-transparent" style={{ 
                       pointerEvents: 'auto',
-                      width: '400px',
-                      height: '711px',
+                      width: '567px',
+                      height: '1008px',
                       maxWidth: '100%',
                       maxHeight: '100%'
                     }}>
@@ -188,12 +188,12 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mx-auto" style={{
-                      width: '400px',
-                      height: '711px',
-                      maxWidth: '100%',
-                      maxHeight: '100%'
-                    }}>
+                        <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mx-auto" style={{
+                          width: '567px',
+                          height: '1008px',
+                          maxWidth: '100%',
+                          maxHeight: '100%'
+                        }}>
                       <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
                       <button 
                         onClick={handleUploadClick}
