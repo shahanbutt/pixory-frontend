@@ -228,7 +228,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                         height: '960px',
                         maxWidth: '100%',
                         maxHeight: '100%',
-                        transform: 'translateY(1px)'
+                        transform: 'translateY(4px)'
                       }}>
                         <img 
                           src={selectedPage.content.images[0]} 
@@ -265,7 +265,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                         height: '960px',
                         maxWidth: '100%',
                         maxHeight: '100%',
-                        transform: 'translateY(1px)'
+                        transform: 'translateY(4px)'
                       }}>
                         <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
                         <button 
