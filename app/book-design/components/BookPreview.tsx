@@ -49,8 +49,8 @@ export default function BookPreview({ pages, isOpen, onClose }: BookPreviewProps
                   <div 
                     className="bg-white border border-gray-300 shadow-lg relative"
                     style={{ 
-                      width: `${width * 0.3}px`, 
-                      height: `${height * 0.3}px`,
+                      width: `${width * 0.4}px`, 
+                      height: `${height * 0.4}px`,
                       transform: 'scale(1)',
                       transformOrigin: 'center'
                     }}
@@ -59,43 +59,93 @@ export default function BookPreview({ pages, isOpen, onClose }: BookPreviewProps
                     <div 
                       className="absolute border-2 border-red-500 pointer-events-none"
                       style={{
-                        top: `${margin * 0.3}px`,
-                        left: `${margin * 0.3}px`,
-                        right: `${margin * 0.3}px`,
-                        bottom: `${margin * 0.3}px`,
+                        top: `${margin * 0.4}px`,
+                        left: `${margin * 0.4}px`,
+                        right: `${margin * 0.4}px`,
+                        bottom: `${margin * 0.4}px`,
                       }}
                     >
                       {/* Content Area */}
-                      <div className="w-full h-full p-2 flex flex-col justify-center items-center text-center">
+                      <div className="w-full h-full flex flex-col justify-center items-center text-center">
                         {/* Page Number */}
                         <div className="absolute top-1 right-1 text-xs text-gray-500 font-medium">
                           {index + 1}
                         </div>
                         
                         {/* Content Preview */}
-                        <div className="flex flex-col items-center">
-                          {page.content.images.length > 0 && (
-                            <div className="mb-2">
-                              <div className="text-2xl text-gray-400 mb-1">🖼️</div>
-                              <p className="text-xs text-gray-600">
-                                {page.content.images.length} image{page.content.images.length !== 1 ? 's' : ''}
-                              </p>
+                        <div className="flex flex-col items-center w-full h-full">
+                          {/* Layout-specific content rendering */}
+                          {page.layout === 'portrait' && page.content.images.length > 0 && (
+                            <div className="w-full h-full flex items-center justify-center overflow-hidden rounded" style={{ border: '1px solid #e5e7eb' }}>
+                              <img 
+                                src={page.content.images[0]} 
+                                alt="Portrait" 
+                                className="w-full h-full object-cover"
+                                style={{
+                                  objectFit: 'cover',
+                                  objectPosition: 'center'
+                                }}
+                              />
                             </div>
                           )}
                           
-                          {page.content.texts.length > 0 && (
-                            <div className="mb-2">
-                              <div className="text-2xl text-gray-400 mb-1">📝</div>
-                              <p className="text-xs text-gray-600">
-                                {page.content.texts.length} text{page.content.texts.length !== 1 ? 's' : ''}
-                              </p>
+                          {page.layout === 'portrait-text' && (
+                            <div className="flex flex-col items-center mx-auto" style={{ transform: 'translateY(-10px)' }}>
+                              {/* Image Container - Exact same dimensions as editor (scaled) */}
+                              {page.content.images.length > 0 && (
+                                <div className="relative overflow-hidden border-2 border-transparent mb-2" style={{ 
+                                  width: `${540 * 0.4}px`,
+                                  height: `${960 * 0.4}px`,
+                                  maxWidth: '100%',
+                                  maxHeight: '100%'
+                                }}>
+                                  <img 
+                                    src={page.content.images[0]} 
+                                    alt="Portrait" 
+                                    className="w-full h-full object-cover"
+                                    style={{ 
+                                      objectFit: 'cover',
+                                      display: 'block'
+                                    }}
+                                  />
+                                </div>
+                              )}
+
+                              {/* Text Container - Exact same dimensions as editor (scaled) */}
+                              {page.content.texts.length > 0 && page.content.texts[0] && (
+                                <div 
+                                  className="border-2 border-gray-300 rounded flex items-center justify-center"
+                                  style={{ 
+                                    width: `${688 * 0.4}px`, 
+                                    height: `${53 * 0.4}px`,
+                                    maxWidth: '100%',
+                                    fontFamily: 'Baloo2, sans-serif'
+                                  }}
+                                >
+                                  <p className="text-gray-700 text-center whitespace-pre-wrap" style={{ fontSize: '11px', lineHeight: '1.2' }}>
+                                    {page.content.texts[0]}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          
+                          {page.layout !== 'portrait' && page.layout !== 'portrait-text' && page.content.images.length > 0 && (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <img 
+                                src={page.content.images[0]} 
+                                alt="Content" 
+                                className="max-w-full max-h-full object-cover rounded"
+                              />
                             </div>
                           )}
                           
                           {page.content.images.length === 0 && page.content.texts.length === 0 && (
-                            <div>
-                              <div className="text-3xl text-gray-300 mb-1">📄</div>
-                              <p className="text-xs text-gray-500">Empty Page</p>
+                            <div className="flex items-center justify-center h-full">
+                              <div>
+                                <div className="text-2xl text-gray-300 mb-1">📄</div>
+                                <p className="text-xs text-gray-500">Empty Page</p>
+                              </div>
                             </div>
                           )}
                         </div>

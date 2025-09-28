@@ -13,6 +13,7 @@ interface PageViewerProps {
 export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: PageViewerProps) {
   const { width, height, margin } = A4_PIXEL_DIMENSIONS;
   const [scale, setScale] = useState(1);
+  const [testInput, setTestInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,12 +36,21 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
     return () => window.removeEventListener('resize', calculateScale);
   }, [width, height]);
 
+  // Initialize testInput with existing text from the page
+  useEffect(() => {
+    if (selectedPage?.content?.texts?.[0]) {
+      setTestInput(selectedPage.content.texts[0]);
+    } else {
+      setTestInput('');
+    }
+  }, [selectedPage]);
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && selectedPage && onUpdatePage) {
-      // Check file size (limit to 2MB to prevent localStorage quota issues)
-      if (file.size > 2 * 1024 * 1024) {
-        alert('Image too large. Please choose an image smaller than 2MB.');
+      // Check file size (limit to 10MB to prevent localStorage quota issues)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image too large. Please choose an image smaller than 10MB.');
         // Reset the input so the same file can be selected again
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
@@ -106,6 +116,9 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
     }
   };
 
+
+
+
   if (!selectedPage) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
@@ -149,6 +162,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
 
               {/* Content Preview */}
               <div className="flex-1 flex flex-col justify-center items-center text-center">
+
                 {selectedPage.layout === 'portrait' ? (
                   selectedPage.content.images.length > 0 ? (
                     <div className="relative overflow-hidden mx-auto border-2 border-transparent" style={{ 
@@ -204,6 +218,118 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                       </button>
                     </div>
                   )
+                ) : selectedPage.layout === 'portrait-text' ? (
+                  <div className="flex flex-col items-center mx-auto">
+                    {/* Image Container - Keep original size */}
+                    {selectedPage.content.images.length > 0 ? (
+                      <div className="relative overflow-hidden border-2 border-transparent mb-4" style={{ 
+                        pointerEvents: 'auto',
+                        width: '540px',
+                        height: '960px',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        transform: 'translateY(1px)'
+                      }}>
+                        <img 
+                          src={selectedPage.content.images[0]} 
+                          alt="Portrait" 
+                          className="w-full h-full object-cover"
+                          style={{ 
+                            pointerEvents: 'none',
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                        <div className="absolute top-2 right-2 flex gap-2 z-20">
+                          <button
+                            onClick={handleUploadClick}
+                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                            style={{ pointerEvents: 'auto', zIndex: 20 }}
+                          >
+                            Change
+                          </button>
+                          <button
+                            onClick={handleDeleteImage}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors cursor-pointer"
+                            style={{ pointerEvents: 'auto', zIndex: 20 }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mb-4" style={{
+                        width: '540px',
+                        height: '960px',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        transform: 'translateY(1px)'
+                      }}>
+                        <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
+                        <button 
+                          onClick={handleUploadClick}
+                          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium relative z-10 cursor-pointer"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Upload Image
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Input Field - 688x53 dimensions, max 2 lines */}
+                    <div style={{ 
+                      width: '688px', 
+                      height: '53px',
+                      maxWidth: '100%',
+                      marginTop: '-7px',
+                      border: '2px solid #d1d5db',
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      zIndex: 1000,
+                      pointerEvents: 'auto'
+                    }}>
+                      <textarea
+                        value={testInput}
+                        onChange={(e) => {
+                          let newValue = e.target.value;
+                          
+                          // Limit to 168 characters first
+                          if (newValue.length > 168) {
+                            newValue = newValue.substring(0, 168);
+                          }
+                          
+                          // Limit to 2 lines by counting line breaks
+                          const lineCount = (newValue.match(/\n/g) || []).length + 1;
+                          
+                          if (lineCount <= 2) {
+                            setTestInput(newValue);
+                            
+                            // Update the page content
+                            if (selectedPage && onUpdatePage) {
+                              onUpdatePage(selectedPage.id, {
+                                images: selectedPage.content.images,
+                                texts: [newValue]
+                              });
+                            }
+                          }
+                        }}
+                        placeholder="Enter text here... (max 168 chars, 2 lines)"
+                        className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
+                        style={{ 
+                          fontFamily: 'Baloo2, sans-serif',
+                          pointerEvents: 'auto',
+                          zIndex: 1001,
+                          lineHeight: '1.2'
+                        }}
+                        autoComplete="off"
+                        rows={2}
+                        maxLength={168}
+                      />
+                    </div>
+                  </div>
                 ) : selectedPage.content.images.length > 0 ? (
                   <div className="mb-3">
                     <div className="text-3xl text-gray-400 mb-1">🖼️</div>
@@ -213,7 +339,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                   </div>
                 ) : null}
                 
-                {selectedPage.content.texts.length > 0 && (
+                {selectedPage.content.texts.length > 0 && selectedPage.layout !== 'portrait-text' && (
                   <div className="mb-3">
                     <div className="text-3xl text-gray-400 mb-1">📝</div>
                     <p className="text-xs text-gray-600">
