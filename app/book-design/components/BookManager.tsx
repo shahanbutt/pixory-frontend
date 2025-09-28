@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { BookPage, LayoutType } from '../types';
 import PageSidebar from './PageSidebar';
 import PageViewer from './PageViewer';
-import BookPreview from './BookPreview';
 import RightSidebar from './RightSidebar';
 
 interface BookManagerProps {
@@ -26,7 +25,6 @@ export default function BookManager({
   onApplyLayout,
   onUpdatePage
 }: BookManagerProps) {
-  const [showPreview, setShowPreview] = useState(false);
   const selectedPage = pages.find(page => page.id === selectedPageId) || null;
   const selectedPageNumber = pages.findIndex(page => page.id === selectedPageId) + 1;
 
@@ -82,14 +80,6 @@ export default function BookManager({
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => setShowPreview(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-                disabled={pages.length === 0}
-              >
-                <span className="text-lg">👁️</span>
-                Preview Book
-              </button>
-              <button
                 onClick={onAddPage}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
               >
@@ -114,12 +104,6 @@ export default function BookManager({
         currentLayout={selectedPage?.layout}
       />
 
-      {/* Book Preview Modal */}
-      <BookPreview
-        pages={pages}
-        isOpen={showPreview}
-        onClose={() => setShowPreview(false)}
-      />
     </div>
   );
 }
