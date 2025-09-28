@@ -112,8 +112,8 @@ export default function ProductHero() {
         console.error('Error loading dropdown options:', error)
         // Fallback to default options
         setDropdownOptions([
-          { label: 'Standard Template', value: 'standard' },
-          { label: 'Start from Scratch', value: 'scratch' }
+          { label: 'Standard Template', value: 'standard', image: '/images/shop-all/product-hero/default.jpg' },
+          { label: 'Start from Scratch', value: 'scratch', image: '/images/shop-all/product-hero/default.jpg' }
         ])
       }
     }
