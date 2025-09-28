@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BookPage } from '../types';
 import { A4_PIXEL_DIMENSIONS } from '../types';
 
 interface PageViewerProps {
   selectedPage: BookPage | null;
   pageNumber: number;
+  onUpdatePage?: (pageId: string, content: { images: string[]; texts: string[] }) => void;
 }
 
-export default function PageViewer({ selectedPage, pageNumber }: PageViewerProps) {
+export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: PageViewerProps) {
   const { width, height, margin } = A4_PIXEL_DIMENSIONS;
   const [scale, setScale] = useState(1);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const calculateScale = () => {
@@ -32,6 +34,77 @@ export default function PageViewer({ selectedPage, pageNumber }: PageViewerProps
     window.addEventListener('resize', calculateScale);
     return () => window.removeEventListener('resize', calculateScale);
   }, [width, height]);
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && selectedPage && onUpdatePage) {
+      // Check file size (limit to 2MB to prevent localStorage quota issues)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image too large. Please choose an image smaller than 2MB.');
+        // Reset the input so the same file can be selected again
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        
+        // Compress the image before storing
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Resize to max 800px width while maintaining aspect ratio
+          const maxWidth = 800;
+          const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+          canvas.width = img.width * ratio;
+          canvas.height = img.height * ratio;
+          
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const compressedImageUrl = canvas.toDataURL('image/jpeg', 0.7);
+            
+            onUpdatePage(selectedPage.id, {
+              images: [compressedImageUrl],
+              texts: selectedPage.content.texts
+            });
+          } else {
+            // Fallback to original if compression fails
+            onUpdatePage(selectedPage.id, {
+              images: [imageUrl],
+              texts: selectedPage.content.texts
+            });
+          }
+          
+          // Reset the input value so the same file can be selected again
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        };
+        img.src = imageUrl;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    fileInputRef.current?.click();
+  };
+
+  const handleDeleteImage = () => {
+    if (selectedPage && onUpdatePage) {
+      onUpdatePage(selectedPage.id, {
+        images: [],
+        texts: selectedPage.content.texts
+      });
+    }
+  };
 
   if (!selectedPage) {
     return (
@@ -71,19 +144,66 @@ export default function PageViewer({ selectedPage, pageNumber }: PageViewerProps
             }}
           >
             {/* Content Area */}
-            <div className="w-full h-full p-4 flex flex-col">
+            <div className="w-full h-full flex flex-col">
               
 
               {/* Content Preview */}
               <div className="flex-1 flex flex-col justify-center items-center text-center">
-                {selectedPage.layout === 'portrait' && selectedPage.content.images.length > 0 ? (
-                  <div className="w-full h-full">
-                    <img 
-                      src={selectedPage.content.images[0]} 
-                      alt="Portrait" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                {selectedPage.layout === 'portrait' ? (
+                  selectedPage.content.images.length > 0 ? (
+                    <div className="relative overflow-hidden mx-auto border-2 border-transparent" style={{ 
+                      pointerEvents: 'auto',
+                      width: '400px',
+                      height: '711px',
+                      maxWidth: '100%',
+                      maxHeight: '100%'
+                    }}>
+                      <img 
+                        src={selectedPage.content.images[0]} 
+                        alt="Portrait" 
+                        className="w-full h-full object-cover"
+                        style={{ 
+                          pointerEvents: 'none',
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                      <div className="absolute top-2 right-2 flex gap-2 z-20">
+                        <button
+                          onClick={handleUploadClick}
+                          className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                          style={{ pointerEvents: 'auto', zIndex: 20 }}
+                        >
+                          Change
+                        </button>
+                        <button
+                          onClick={handleDeleteImage}
+                          className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors cursor-pointer"
+                          style={{ pointerEvents: 'auto', zIndex: 20 }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mx-auto" style={{
+                      width: '400px',
+                      height: '711px',
+                      maxWidth: '100%',
+                      maxHeight: '100%'
+                    }}>
+                      <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
+                      <button 
+                        onClick={handleUploadClick}
+                        className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium relative z-10 cursor-pointer"
+                        style={{ pointerEvents: 'auto' }}
+                      >
+                        Upload Image
+                      </button>
+                    </div>
+                  )
                 ) : selectedPage.content.images.length > 0 ? (
                   <div className="mb-3">
                     <div className="text-3xl text-gray-400 mb-1">🖼️</div>
@@ -102,23 +222,20 @@ export default function PageViewer({ selectedPage, pageNumber }: PageViewerProps
                   </div>
                 )}
                 
-                {selectedPage.content.images.length === 0 && selectedPage.content.texts.length === 0 && (
-                  <div>
-                    <div className="text-4xl text-gray-300 mb-2">📄</div>
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
-                      {selectedPage.layout ? 'Layout Applied' : 'Empty Page'}
-                    </h3>
-                    <p className="text-xs text-gray-500">
-                      {selectedPage.layout ? 'Ready for content' : 'Select a layout to get started'}
-                    </p>
-                  </div>
-                )}
               </div>
               
             </div>
           </div>
         </div>
         
+        {/* Hidden file input - always available */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          style={{ display: 'none' }}
+        />
       </div>
     </div>
   );

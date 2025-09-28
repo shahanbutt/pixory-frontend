@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { BookPage, LayoutType } from './types';
 import BookManager from './components/BookManager';
 
+
 export default function BookDesign() {
   const [pages, setPages] = useState<BookPage[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
@@ -35,7 +36,19 @@ export default function BookDesign() {
         selectedPageId,
         lastSaved: new Date().toISOString()
       };
-      localStorage.setItem('digital-book', JSON.stringify(bookData));
+      
+      try {
+        localStorage.setItem('digital-book', JSON.stringify(bookData));
+      } catch (error) {
+        console.warn('Failed to save to localStorage, data too large:', error);
+        // Clear old data and try again
+        localStorage.removeItem('digital-book');
+        try {
+          localStorage.setItem('digital-book', JSON.stringify(bookData));
+        } catch (retryError) {
+          console.error('Still too large after clearing, consider reducing image sizes');
+        }
+      }
     }
   }, [pages, selectedPageId]);
 
@@ -118,21 +131,30 @@ export default function BookDesign() {
       if (page.id === pageId) {
         const updatedPage = { ...page, layout };
         
-        // Add sample content based on layout
+        // Clear content when applying layout - let user upload their own content
         if (layout === 'portrait') {
           updatedPage.content = {
-            images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face'], // Sample portrait image
+            images: [],
             texts: []
           };
         } else if (layout === 'portrait-text') {
           updatedPage.content = {
-            images: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face'],
-            texts: ['Sample text content']
+            images: [],
+            texts: []
           };
         }
         // Add more layout-specific content as needed
         
         return updatedPage;
+      }
+      return page;
+    }));
+  };
+
+  const updatePageContent = (pageId: string, content: { images: string[]; texts: string[] }) => {
+    setPages(pages.map(page => {
+      if (page.id === pageId) {
+        return { ...page, content };
       }
       return page;
     }));
@@ -147,6 +169,7 @@ export default function BookDesign() {
         onSelectPage={selectPage}
         selectedPageId={selectedPageId}
         onApplyLayout={applyLayout}
+        onUpdatePage={updatePageContent}
       />
     </div>
   );

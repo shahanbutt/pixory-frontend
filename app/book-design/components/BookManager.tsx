@@ -14,6 +14,7 @@ interface BookManagerProps {
   onSelectPage: (pageId: string) => void;
   selectedPageId: string | null;
   onApplyLayout: (pageId: string, layout: LayoutType) => void;
+  onUpdatePage?: (pageId: string, content: { images: string[]; texts: string[] }) => void;
 }
 
 export default function BookManager({ 
@@ -22,7 +23,8 @@ export default function BookManager({
   onDeletePage, 
   onSelectPage,
   selectedPageId,
-  onApplyLayout
+  onApplyLayout,
+  onUpdatePage
 }: BookManagerProps) {
   const [showPreview, setShowPreview] = useState(false);
   const selectedPage = pages.find(page => page.id === selectedPageId) || null;
@@ -102,6 +104,7 @@ export default function BookManager({
         <PageViewer
           selectedPage={selectedPage}
           pageNumber={selectedPageNumber}
+          onUpdatePage={onUpdatePage}
         />
       </div>
 
