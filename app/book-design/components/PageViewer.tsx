@@ -316,7 +316,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                             }
                           }
                         }}
-                        placeholder="Enter text here... (max 168 chars, 2 lines)"
+                        placeholder="Enter text here"
                         className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
                         style={{ 
                           fontFamily: 'Baloo2, sans-serif',
