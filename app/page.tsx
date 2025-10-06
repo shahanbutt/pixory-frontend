@@ -66,10 +66,10 @@ export default function Home() {
             </div>
             <h2 className="text-4xl font-bold text-brand-charcoal tracking-tight mb-3">Preserve your adventures in beautiful photobooks</h2>
             <p className="text-brand-gray mb-6">Studio Printique allows you to create lasting keepsakes of your cherished moments. Transform your experiences into unforgettable stories.</p>
-            <div className="flex justify-center gap-4">
-              <button className="bg-brand-charcoal text-white px-6 py-3 rounded-md font-semibold text-sm hover:bg-black transition-colors">Start My Design</button>
-              <button className="bg-transparent border border-gray-400 text-brand-charcoal px-6 py-3 rounded-md font-semibold text-sm hover:bg-gray-100 transition-colors">Read the reviews</button>
-            </div>
+                      <div className="flex justify-center gap-4">
+                          <a href="/book-design" className="bg-brand-charcoal text-white px-6 py-3 rounded-md font-semibold text-sm hover:bg-black transition-colors">Start My Design</a>
+                          <button className="bg-transparent border border-gray-400 text-brand-charcoal px-6 py-3 rounded-md font-semibold text-sm hover:bg-gray-100 transition-colors">Read the reviews</button>
+                      </div>
           </div>
           <div className="absolute bottom-8 text-center w-full">
             <p className="text-sm font-semibold tracking-wider text-brand-charcoal bg-white/80 backdrop-blur-sm py-1 px-4 rounded-full inline-block">#1 rated in photo books</p>
@@ -81,10 +81,10 @@ export default function Home() {
             <div className="max-w-md">
               <h3 className="text-4xl font-bold tracking-tight mb-4">Preserve your adventures in stunning photobooks</h3>
               <p className="text-brand-gray mb-8">Studio Printique's travel books capture the emotional essence of your journeys, transforming them into beautiful keepsakes that will last a lifetime. Each book is meticulously crafted to reflect the unique aesthetic and sentimental value of your experiences.</p>
-              <div className="flex gap-4">
-                <button className="bg-brand-charcoal text-white px-6 py-3 rounded-md font-semibold text-sm hover:bg-black transition-colors">Start My Design</button>
-                <button className="bg-transparent border border-gray-400 text-brand-charcoal px-6 py-3 rounded-md font-semibold text-sm hover:bg-gray-100 transition-colors">Read the reviews</button>
-              </div>
+                          <div className="flex gap-4">
+                              <a href="/book-design" className="bg-brand-charcoal text-white px-6 py-3 rounded-md font-semibold text-sm hover:bg-black transition-colors">Start My Design</a>
+                              <button className="bg-transparent border border-gray-400 text-brand-charcoal px-6 py-3 rounded-md font-semibold text-sm hover:bg-gray-100 transition-colors">Read the reviews</button>
+                          </div>
             </div>
             <div>
               <img className="w-full h-auto rounded-lg shadow-xl" src="/Images/HomePage/feature-1-photobook.png" alt="A beautifully designed photobook with" />

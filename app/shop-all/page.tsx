@@ -201,7 +201,7 @@ export default function ShopAll() {
                   </div>
                 </div>
                 <div className="mt-8">
-                  <button className="w-full bg-brand-charcoal text-white py-3.5 rounded-lg font-semibold hover:bg-black transition-colors">Start My Design</button>
+                  <a href="/book-design" className="w-full bg-brand-charcoal text-white py-3.5 rounded-lg font-semibold hover:bg-black transition-colors text-center block">Start My Design</a>
                   <p className="text-xs text-brand-gray text-center mt-3">Free shipping on all orders</p>
                 </div>
               </div>

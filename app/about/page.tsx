@@ -339,9 +339,7 @@ export default function About() {
             <h2 className="text-4xl font-bold tracking-tight mb-6">Ready to Create Your Story?</h2>
             <p className="text-xl text-gray-300 mb-8">Join over 100,000 customers who trust Studio Printique with their precious memories.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-white text-brand-charcoal px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                Start Creating
-              </button>
+              <a href="/book-design" className="bg-brand-charcoal text-white px-8 py-4 rounded-lg font-semibold hover:bg-black transition-colors">Start Creating</a>
               <button className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-brand-charcoal transition-colors">
                 View Templates
               </button>
