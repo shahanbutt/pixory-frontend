@@ -1,6 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+interface UploadedImage {
+  id: string
+  file: File
+  url: string
+  name: string
+}
+
+interface Page {
+  id: number
+  title: string
+  layout: string
+  images: string[]
+  text: string
+}
 
 export default function BookDesign() {
   const [activeTab, setActiveTab] = useState<'upload' | 'layouts' | 'pages'>('upload')
@@ -8,19 +23,75 @@ export default function BookDesign() {
   const [showSaveConfirmation, setShowSaveConfirmation] = useState(false)
   const [selectedLayout, setSelectedLayout] = useState('single-portrait')
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages] = useState(6)
+  const [totalPages, setTotalPages] = useState(6)
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([])
+  const [pages, setPages] = useState<Page[]>([
+    { id: 1, title: 'Cover Page', layout: 'Single Portrait Layout', images: [], text: '' },
+    { id: 2, title: 'Paris Adventures', layout: 'Double Portrait Layout', images: [], text: '' },
+    { id: 3, title: 'City Views', layout: 'Single Landscape Layout', images: [], text: '' },
+    { id: 4, title: 'Food & Culture', layout: 'Grid 2x2 Layout', images: [], text: '' },
+    { id: 5, title: 'Memories', layout: 'Triple Layout', images: [], text: '' },
+    { id: 6, title: 'Back Cover', layout: 'Single Portrait Layout', images: [], text: '' }
+  ])
+  const [draggedImage, setDraggedImage] = useState<string | null>(null)
+  const [canvasImage, setCanvasImage] = useState<string | null>(null)
+  const [canvasText, setCanvasText] = useState<string>('')
+  const [isEditingText, setIsEditingText] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const canvasImageRef = useRef<HTMLDivElement>(null)
+  const canvasTextRef = useRef<HTMLDivElement>(null)
 
+  // File upload functionality
   const handleFileUpload = (files: FileList | null) => {
     if (files) {
-      console.log('Files uploaded:', Array.from(files))
+      const newImages: UploadedImage[] = Array.from(files).map((file, index) => ({
+        id: `img-${Date.now()}-${index}`,
+        file,
+        url: URL.createObjectURL(file),
+        name: file.name
+      }))
+      setUploadedImages(prev => [...prev, ...newImages])
     }
   }
 
+  // Drag and drop functionality
+  const handleDragStart = (imageUrl: string) => {
+    setDraggedImage(imageUrl)
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    if (draggedImage) {
+      setCanvasImage(draggedImage)
+      setDraggedImage(null)
+    }
+  }
+
+  // Save functionality
   const handleSaveBook = () => {
+    const bookData = {
+      pages,
+      currentPage,
+      selectedLayout,
+      uploadedImages: uploadedImages.map(img => ({
+        id: img.id,
+        name: img.name,
+        url: img.url
+      })),
+      timestamp: new Date().toISOString()
+    }
+    
+    localStorage.setItem('bookDesign', JSON.stringify(bookData))
     setShowSaveConfirmation(true)
     setTimeout(() => setShowSaveConfirmation(false), 3000)
   }
 
+  // Preview functionality
   const handlePreview = () => {
     setShowPreview(true)
   }
@@ -29,38 +100,120 @@ export default function BookDesign() {
     setShowPreview(false)
   }
 
+  // Text editing functionality
   const handleTextEdit = () => {
-    const text = prompt('Enter your text:')
-    if (text) {
-      // Handle text editing logic here
-      console.log('Text entered:', text)
+    setIsEditingText(true)
+  }
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCanvasText(e.target.value)
+  }
+
+  const handleTextSave = () => {
+    setIsEditingText(false)
+    // Update the current page with the text
+    setPages(prev => prev.map(page => 
+      page.id === currentPage 
+        ? { ...page, text: canvasText }
+        : page
+    ))
+  }
+
+  // Image selection functionality
+  const handleImageClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click()
     }
   }
 
-  const handleImageClick = () => {
-    // Handle image selection logic here
-    console.log('Image placeholder clicked - would open image selector')
-  }
-
+  // Layout selection functionality
   const handleLayoutSelect = (layout: string) => {
     setSelectedLayout(layout)
+    // Update current page layout
+    setPages(prev => prev.map(page => 
+      page.id === currentPage 
+        ? { ...page, layout: layout.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) + ' Layout' }
+        : page
+    ))
   }
 
+  // Page management functionality
   const handlePageSelect = (page: number) => {
     setCurrentPage(page)
+    // Load page data
+    const pageData = pages.find(p => p.id === page)
+    if (pageData) {
+      setCanvasImage(pageData.images[0] || null)
+      setCanvasText(pageData.text)
+    }
   }
 
+  const handleAddPage = () => {
+    const newPage: Page = {
+      id: totalPages + 1,
+      title: `Page ${totalPages + 1}`,
+      layout: 'Single Portrait Layout',
+      images: [],
+      text: ''
+    }
+    setPages(prev => [...prev, newPage])
+    setTotalPages(prev => prev + 1)
+  }
+
+  const handleDeletePage = (pageId: number) => {
+    if (totalPages > 1) {
+      setPages(prev => prev.filter(page => page.id !== pageId))
+      setTotalPages(prev => prev - 1)
+      if (currentPage === pageId) {
+        setCurrentPage(1)
+      }
+    }
+  }
+
+  // Navigation functionality
   const nextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1)
+      handlePageSelect(currentPage + 1)
     }
   }
 
   const prevPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1)
+      handlePageSelect(currentPage - 1)
     }
   }
+
+  // Auto-fill functionality
+  const handleAutoFill = () => {
+    if (uploadedImages.length > 0) {
+      const imagesPerPage = Math.ceil(uploadedImages.length / totalPages)
+      const updatedPages = pages.map((page, index) => ({
+        ...page,
+        images: uploadedImages
+          .slice(index * imagesPerPage, (index + 1) * imagesPerPage)
+          .map(img => img.url)
+      }))
+      setPages(updatedPages)
+    }
+  }
+
+  // Load saved data on component mount
+  useEffect(() => {
+    const savedData = localStorage.getItem('bookDesign')
+    if (savedData) {
+      try {
+        const data = JSON.parse(savedData)
+        if (data.pages) setPages(data.pages)
+        if (data.currentPage) setCurrentPage(data.currentPage)
+        if (data.selectedLayout) setSelectedLayout(data.selectedLayout)
+        if (data.uploadedImages) setUploadedImages(data.uploadedImages)
+      } catch (error) {
+        console.error('Error loading saved data:', error)
+      }
+    }
+  }, [])
 
   return (
     <div className="antialiased">
@@ -107,6 +260,12 @@ export default function BookDesign() {
               >
                 <i className="fa-solid fa-eye mr-2"></i>Preview
               </button>
+              <a 
+                href="/payment"
+                className="bg-brand-charcoal text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-black transition-colors"
+              >
+                <i className="fa-solid fa-shopping-cart mr-2"></i>Order Now - $24.99
+              </a>
             </div>
             <span className="font-medium cursor-pointer">USD</span>
             <span className="text-base cursor-pointer"><i className="fa-solid fa-magnifying-glass"></i></span>
@@ -167,7 +326,13 @@ export default function BookDesign() {
                     <div 
                       id="image-upload-area" 
                       className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 hover:border-brand-charcoal transition-colors cursor-pointer"
-                      onClick={() => document.getElementById('file-input')?.click()}
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => {
+                        e.preventDefault()
+                        const files = e.dataTransfer.files
+                        handleFileUpload(files)
+                      }}
                     >
                       <i className="fa-solid fa-cloud-upload-alt text-4xl text-brand-gray mb-4"></i>
                       <h3 className="font-semibold mb-2">Upload Your Images</h3>
@@ -176,8 +341,8 @@ export default function BookDesign() {
                         Choose Files
                       </button>
                       <input 
+                        ref={fileInputRef}
                         type="file" 
-                        id="file-input" 
                         multiple 
                         accept="image/*" 
                         className="hidden"
@@ -186,25 +351,50 @@ export default function BookDesign() {
                     </div>
                     
                     <div id="uploaded-images" className="space-y-3">
-                      <h4 className="font-semibold text-sm">Uploaded Images (8)</h4>
-                      <div className="grid grid-cols-3 gap-3">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                          <div key={num} className="relative group cursor-move" draggable="true">
-                            <img 
-                              src={`/Images/book-design/travel-${num}.svg`} 
-                              className="w-full h-20 object-cover rounded-lg" 
-                              alt={`Travel photo ${num}`}
-                            />
-                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all flex items-center justify-center">
-                              <i className="fa-solid fa-grip-vertical text-white opacity-0 group-hover:opacity-100"></i>
+                      <h4 className="font-semibold text-sm">Uploaded Images ({uploadedImages.length})</h4>
+                      {uploadedImages.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-3">
+                          {uploadedImages.map((image) => (
+                            <div 
+                              key={image.id} 
+                              className="relative group cursor-move" 
+                              draggable="true"
+                              onDragStart={() => handleDragStart(image.url)}
+                            >
+                              <img 
+                                src={image.url} 
+                                className="w-full h-20 object-cover rounded-lg" 
+                                alt={image.name}
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 rounded-lg transition-all flex items-center justify-center">
+                                <i className="fa-solid fa-grip-vertical text-white opacity-0 group-hover:opacity-100"></i>
+                              </div>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setUploadedImages(prev => prev.filter(img => img.id !== image.id))
+                                }}
+                                className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <i className="fa-solid fa-times"></i>
+                              </button>
                             </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-8 text-brand-gray">
+                          <i className="fa-solid fa-images text-3xl mb-2"></i>
+                          <p className="text-sm">No images uploaded yet</p>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="mt-6 pt-6 border-t border-gray-200">
-                      <button className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
+                      <button 
+                        onClick={handleAutoFill}
+                        disabled={uploadedImages.length === 0}
+                        className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                      >
                         <i className="fa-solid fa-magic mr-2"></i>Auto-fill Pages
                       </button>
                       <p className="text-xs text-brand-gray text-center mt-2">Automatically populate pages with uploaded images</p>
@@ -263,20 +453,16 @@ export default function BookDesign() {
                   <div id="pages-tab" className="p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="font-semibold text-sm">Pages ({totalPages})</h4>
-                      <button className="bg-brand-charcoal text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-black transition-colors">
+                      <button 
+                        onClick={handleAddPage}
+                        className="bg-brand-charcoal text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-black transition-colors"
+                      >
                         <i className="fa-solid fa-plus mr-1"></i>Add Page
                       </button>
                     </div>
                     
                     <div id="pages-list" className="space-y-3">
-                      {[
-                        { id: 1, title: 'Cover Page', layout: 'Single Portrait Layout' },
-                        { id: 2, title: 'Paris Adventures', layout: 'Double Portrait Layout' },
-                        { id: 3, title: 'City Views', layout: 'Single Landscape Layout' },
-                        { id: 4, title: 'Food & Culture', layout: 'Grid 2x2 Layout' },
-                        { id: 5, title: 'Memories', layout: 'Triple Layout' },
-                        { id: 6, title: 'Back Cover', layout: 'Single Portrait Layout' }
-                      ].map((page) => (
+                      {pages.map((page) => (
                         <div 
                           key={page.id}
                           onClick={() => handlePageSelect(page.id)}
@@ -292,8 +478,25 @@ export default function BookDesign() {
                           <div className="flex-1">
                             <p className="text-sm font-medium">{page.title}</p>
                             <p className="text-xs text-brand-gray">{page.layout}</p>
+                            {page.images.length > 0 && (
+                              <p className="text-xs text-green-600">
+                                <i className="fa-solid fa-image mr-1"></i>{page.images.length} image(s)
+                              </p>
+                            )}
+                            {page.text && (
+                              <p className="text-xs text-blue-600">
+                                <i className="fa-solid fa-text-width mr-1"></i>Has text
+                              </p>
+                            )}
                           </div>
-                          <button className="text-brand-gray hover:text-red-600 transition-colors">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeletePage(page.id)
+                            }}
+                            disabled={totalPages <= 1}
+                            className="text-brand-gray hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
                             <i className="fa-solid fa-trash text-sm"></i>
                           </button>
                         </div>
@@ -336,26 +539,105 @@ export default function BookDesign() {
               <div id="editor-canvas" className="flex-1 bg-gray-100 p-8 overflow-auto">
                 <div className="max-w-2xl mx-auto">
                   <div id="page-canvas" className="bg-white shadow-lg mx-auto" style={{width: '595px', height: '842px', padding: '10px'}}>
-                    <div className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg relative">
+                    <div 
+                      className="w-full h-full border-2 border-dashed border-gray-300 rounded-lg relative"
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                    >
                       
+                      {/* Image Area */}
                       <div 
-                        id="image-placeholder-1" 
+                        ref={canvasImageRef}
                         className="absolute top-4 left-4 right-4 h-80 border-2 border-dashed border-blue-400 bg-blue-50 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-blue-100 transition-colors"
                         onClick={handleImageClick}
                       >
-                        <i className="fa-solid fa-image text-4xl text-blue-400 mb-3"></i>
-                        <p className="text-blue-600 font-medium">Drop image here</p>
-                        <p className="text-sm text-blue-500">or click to select</p>
+                        {canvasImage ? (
+                          <div className="relative w-full h-full">
+                            <img 
+                              src={canvasImage} 
+                              alt="Canvas image" 
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setCanvasImage(null)
+                              }}
+                              className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                            >
+                              <i className="fa-solid fa-times"></i>
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <i className="fa-solid fa-image text-4xl text-blue-400 mb-3"></i>
+                            <p className="text-blue-600 font-medium">Drop image here</p>
+                            <p className="text-sm text-blue-500">or click to select</p>
+                          </>
+                        )}
                       </div>
                       
+                      {/* Text Area */}
                       <div 
-                        id="text-area-1" 
+                        ref={canvasTextRef}
                         className="absolute bottom-4 left-4 right-4 h-32 border-2 border-dashed border-green-400 bg-green-50 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-green-100 transition-colors"
                         onClick={handleTextEdit}
                       >
-                        <i className="fa-solid fa-text-width text-2xl text-green-500 mb-2"></i>
-                        <p className="text-green-600 font-medium">Add text here</p>
-                        <p className="text-sm text-green-500">Click to edit</p>
+                        {isEditingText ? (
+                          <div className="w-full h-full p-4">
+                            <textarea
+                              value={canvasText}
+                              onChange={handleTextChange}
+                              className="w-full h-full resize-none border-none bg-transparent text-center text-brand-charcoal font-medium focus:outline-none"
+                              placeholder="Enter your text here..."
+                              autoFocus
+                            />
+                            <div className="flex gap-2 mt-2">
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleTextSave()
+                                }}
+                                className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
+                              >
+                                Save
+                              </button>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setIsEditingText(false)
+                                }}
+                                className="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : canvasText ? (
+                          <div className="w-full h-full flex items-center justify-center p-4">
+                            <p className="text-center text-brand-charcoal font-medium">{canvasText}</p>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setCanvasText('')
+                                setPages(prev => prev.map(page => 
+                                  page.id === currentPage 
+                                    ? { ...page, text: '' }
+                                    : page
+                                ))
+                              }}
+                              className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs"
+                            >
+                              <i className="fa-solid fa-times"></i>
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <i className="fa-solid fa-text-width text-2xl text-green-500 mb-2"></i>
+                            <p className="text-green-600 font-medium">Add text here</p>
+                            <p className="text-sm text-green-500">Click to edit</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -408,26 +690,36 @@ export default function BookDesign() {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-3 gap-4 mb-6">
-                {[
-                  { title: 'Cover', page: 1 },
-                  { title: 'Paris Adventures', page: 2 },
-                  { title: 'City Views', page: 3 },
-                  { title: 'Food & Culture', page: 4 },
-                  { title: 'Memories', page: 5 },
-                  { title: 'Back Cover', page: 6 }
-                ].map((page) => (
-                  <div key={page.page} className="bg-gray-100 rounded-lg p-4 text-center">
-                    <div className="w-full h-32 bg-white border border-gray-300 rounded mb-2 flex items-center justify-center">
-                      <span className="text-sm text-brand-gray">{page.title}</span>
+                {pages.map((page) => (
+                  <div key={page.id} className="bg-gray-100 rounded-lg p-4 text-center">
+                    <div className="w-full h-32 bg-white border border-gray-300 rounded mb-2 flex items-center justify-center relative">
+                      {page.images.length > 0 ? (
+                        <img 
+                          src={page.images[0]} 
+                          alt={page.title}
+                          className="w-full h-full object-cover rounded"
+                        />
+                      ) : (
+                        <span className="text-sm text-brand-gray">{page.title}</span>
+                      )}
+                      {page.text && (
+                        <div className="absolute bottom-1 left-1 right-1 bg-black bg-opacity-50 text-white text-xs p-1 rounded">
+                          <i className="fa-solid fa-text-width mr-1"></i>Text
+                        </div>
+                      )}
                     </div>
-                    <p className="text-xs text-brand-gray">Page {page.page}</p>
+                    <p className="text-xs text-brand-gray">Page {page.id}</p>
+                    <p className="text-xs text-brand-charcoal font-medium">{page.title}</p>
                   </div>
                 ))}
               </div>
               <div className="flex justify-center gap-4">
-                <button className="bg-brand-charcoal text-white px-6 py-3 rounded-lg font-medium hover:bg-black transition-colors">
+                <a 
+                  href="/payment"
+                  className="bg-brand-charcoal text-white px-6 py-3 rounded-lg font-medium hover:bg-black transition-colors"
+                >
                   Order Now - $24.99
-                </button>
+                </a>
                 <button 
                   onClick={handleClosePreview}
                   className="bg-gray-200 text-brand-charcoal px-6 py-3 rounded-lg font-medium hover:bg-gray-300 transition-colors"

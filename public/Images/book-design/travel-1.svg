@@ -1,6 +1,8 @@
-<svg width="200" height="150" xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="150" viewBox="0 0 200 150">
   <rect width="200" height="150" fill="#f3f4f6"/>
-  <rect x="20" y="20" width="160" height="110" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
-  <circle cx="100" cy="75" r="20" fill="#9ca3af"/>
-  <text x="100" y="120" text-anchor="middle" font-family="Arial" font-size="12" fill="#6b7280">Travel Photo 1</text>
+  <rect x="10" y="10" width="180" height="130" fill="#ffffff" stroke="#d1d5db" stroke-width="2"/>
+  <text x="100" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#374151">Travel Book Cover</text>
+  <circle cx="50" cy="40" r="15" fill="#3b82f6"/>
+  <circle cx="150" cy="40" r="15" fill="#ef4444"/>
+  <circle cx="100" cy="100" r="15" fill="#10b981"/>
 </svg>
