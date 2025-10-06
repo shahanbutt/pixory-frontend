@@ -35,9 +35,9 @@ export default function Home() {
             <div className="flex items-center gap-10">
               <a href="/" className="text-2xl font-bold tracking-tighter hover:opacity-80 transition-opacity">Studio Printique</a>
             <nav className="hidden md:flex gap-8 text-sm font-medium text-brand-charcoal">
-              <span className="hover:text-brand-gray transition-colors cursor-pointer">Shop All</span>
-              <span className="hover:text-brand-gray transition-colors cursor-pointer">About</span>
-              <span className="hover:text-brand-gray transition-colors cursor-pointer">FAQ</span>
+              <a href="/shop-all" className="hover:text-brand-gray transition-colors cursor-pointer">Shop All</a>
+              <a href="/about" className="hover:text-brand-gray transition-colors cursor-pointer">About</a>
+              <a href="/faq" className="hover:text-brand-gray transition-colors cursor-pointer">FAQ</a>
             </nav>
           </div>
             <div className="flex items-center gap-6 text-sm">

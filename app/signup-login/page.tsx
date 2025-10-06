@@ -183,7 +183,7 @@ export default function SignUpLogin() {
       <main className="flex min-h-screen">
         <section className="w-1/2 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-charcoal/40 via-charcoal/20 to-transparent z-10"></div>
-          <img className="w-full h-full object-cover" src="https://storage.googleapis.com/uxpilot-auth.appspot.com/068dbbafbd-2c546a39c354ce662da1.png" alt="elegant photobooks and photo albums arranged artistically on wooden table, soft natural lighting, minimalist aesthetic, premium quality" />
+          <img className="w-full h-full object-cover" src="/Images/signup-login/hero-background.png" alt="elegant photobooks and photo albums arranged artistically on wooden table, soft natural lighting, minimalist aesthetic, premium quality" />
           
           <div className="absolute inset-0 z-20 flex flex-col justify-center px-16 text-white">
             <h1 className="text-5xl font-bold mb-6 leading-tight">Create Beautiful Memories</h1>
@@ -208,7 +208,7 @@ export default function SignUpLogin() {
 
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6">
               <div className="flex items-center mb-4">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                <img src="/Images/signup-login/avatar-1.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <div className="font-semibold">Sarah Mitchell</div>
                   <div className="flex text-yellow-400 text-sm">
@@ -563,7 +563,7 @@ export default function SignUpLogin() {
               </div>
               <p className="text-warm-gray mb-6 italic">"The quality is absolutely incredible. My family photobook turned out better than I could have imagined. The colors are vibrant and the paper feels premium."</p>
               <div className="flex items-center">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                <img src="/Images/signup-login/avatar-2.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <div className="font-semibold text-charcoal">Michael Chen</div>
                   <div className="text-sm text-warm-gray">Wedding Photography</div>
@@ -581,7 +581,7 @@ export default function SignUpLogin() {
               </div>
               <p className="text-warm-gray mb-6 italic">"Easy to use interface and beautiful templates. I created my travel photobook in minutes and it arrived perfectly packaged. Will definitely use again!"</p>
               <div className="flex items-center">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                <img src="/Images/signup-login/avatar-5.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <div className="font-semibold text-charcoal">Emma Rodriguez</div>
                   <div className="text-sm text-warm-gray">Travel Enthusiast</div>
@@ -599,7 +599,7 @@ export default function SignUpLogin() {
               </div>
               <p className="text-warm-gray mb-6 italic">"Professional quality at an affordable price. The customer service team was incredibly helpful throughout the process. Highly recommended!"</p>
               <div className="flex items-center">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
+                <img src="/Images/signup-login/avatar-3.jpg" alt="Customer" className="w-12 h-12 rounded-full mr-4" />
                 <div>
                   <div className="font-semibold text-charcoal">David Thompson</div>
                   <div className="text-sm text-warm-gray">Family Memories</div>
