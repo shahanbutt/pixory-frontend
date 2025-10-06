@@ -14,6 +14,8 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
   const { width, height, margin } = A4_PIXEL_DIMENSIONS;
   const [scale, setScale] = useState(1);
   const [testInput, setTestInput] = useState('');
+  const [secondTextInput, setSecondTextInput] = useState('');
+  const [uploadingImageIndex, setUploadingImageIndex] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -36,12 +38,18 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
     return () => window.removeEventListener('resize', calculateScale);
   }, [width, height]);
 
-  // Initialize testInput with existing text from the page
+  // Initialize text inputs with existing text from the page
   useEffect(() => {
     if (selectedPage?.content?.texts?.[0]) {
       setTestInput(selectedPage.content.texts[0]);
     } else {
       setTestInput('');
+    }
+    
+    if (selectedPage?.content?.texts?.[1]) {
+      setSecondTextInput(selectedPage.content.texts[1]);
+    } else {
+      setSecondTextInput('');
     }
   }, [selectedPage]);
 
@@ -78,14 +86,23 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
             const compressedImageUrl = canvas.toDataURL('image/jpeg', 0.7);
             
+            // Update the specific image position
+            const currentImages = selectedPage.content.images || [];
+            const updatedImages = [...currentImages];
+            updatedImages[uploadingImageIndex] = compressedImageUrl;
+            
             onUpdatePage(selectedPage.id, {
-              images: [compressedImageUrl],
+              images: updatedImages,
               texts: selectedPage.content.texts
             });
           } else {
             // Fallback to original if compression fails
+            const currentImages = selectedPage.content.images || [];
+            const updatedImages = [...currentImages];
+            updatedImages[uploadingImageIndex] = imageUrl;
+            
             onUpdatePage(selectedPage.id, {
-              images: [imageUrl],
+              images: updatedImages,
               texts: selectedPage.content.texts
             });
           }
@@ -101,16 +118,21 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
     }
   };
 
-  const handleUploadClick = (e: React.MouseEvent) => {
+  const handleUploadClick = (e: React.MouseEvent, imageIndex: number = 0) => {
     e.preventDefault();
     e.stopPropagation();
+    setUploadingImageIndex(imageIndex);
     fileInputRef.current?.click();
   };
 
-  const handleDeleteImage = () => {
+  const handleDeleteImage = (imageIndex: number) => {
     if (selectedPage && onUpdatePage) {
+      const currentImages = selectedPage.content.images || [];
+      const updatedImages = [...currentImages];
+      updatedImages[imageIndex] = ''; // Clear the specific image
+      
       onUpdatePage(selectedPage.id, {
-        images: [],
+        images: updatedImages,
         texts: selectedPage.content.texts
       });
     }
@@ -330,6 +352,410 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                       />
                     </div>
                   </div>
+                ) : selectedPage.layout === 'landscape-2text' ? (
+                  <div className="flex flex-col items-center mx-auto">
+                    {/* First Text Input Field - Above image */}
+                    <div style={{ 
+                      width: '688px', 
+                      height: '53px',
+                      maxWidth: '100%',
+                      marginBottom: '15px',
+                      border: '2px solid #d1d5db',
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      zIndex: 1000,
+                      pointerEvents: 'auto'
+                    }}>
+                      <textarea
+                        value={testInput}
+                        onChange={(e) => {
+                          let newValue = e.target.value;
+                          
+                          // Limit to 168 characters first
+                          if (newValue.length > 168) {
+                            newValue = newValue.substring(0, 168);
+                          }
+                          
+                          // Limit to 2 lines by counting line breaks
+                          const lineCount = (newValue.match(/\n/g) || []).length + 1;
+                          
+                          if (lineCount <= 2) {
+                            setTestInput(newValue);
+                            
+                            // Update the page content - save to first text position
+                            if (selectedPage && onUpdatePage) {
+                              const currentTexts = selectedPage.content.texts || [];
+                              const updatedTexts = [...currentTexts];
+                              updatedTexts[0] = newValue;
+                              
+                              onUpdatePage(selectedPage.id, {
+                                images: selectedPage.content.images,
+                                texts: updatedTexts
+                              });
+                            }
+                          }
+                        }}
+                        placeholder="Enter text here"
+                        className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
+                        style={{ 
+                          fontFamily: 'Baloo2, sans-serif',
+                          pointerEvents: 'auto',
+                          zIndex: 1001,
+                          lineHeight: '1.2'
+                        }}
+                        autoComplete="off"
+                        rows={2}
+                        maxLength={168}
+                      />
+                    </div>
+
+                    {/* Image Container - Landscape orientation */}
+                    {selectedPage.content.images.length > 0 ? (
+                      <div className="relative overflow-hidden border-2 border-transparent mb-4" style={{ 
+                        pointerEvents: 'auto',
+                        width: '688px',
+                        height: '387px',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        transform: 'translateY(4px)'
+                      }}>
+                        <img 
+                          src={selectedPage.content.images[0]} 
+                          alt="Landscape" 
+                          className="w-full h-full object-cover"
+                          style={{ 
+                            pointerEvents: 'none',
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                        <div className="absolute top-2 right-2 flex gap-2 z-20">
+                          <button
+                            onClick={handleUploadClick}
+                            className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                            style={{ pointerEvents: 'auto', zIndex: 20 }}
+                          >
+                            Change
+                          </button>
+                          <button
+                            onClick={handleDeleteImage}
+                            className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors cursor-pointer"
+                            style={{ pointerEvents: 'auto', zIndex: 20 }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors mb-4" style={{
+                        width: '688px',
+                        height: '387px',
+                        maxWidth: '100%',
+                        maxHeight: '100%',
+                        transform: 'translateY(4px)'
+                      }}>
+                        <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Landscape Image</h3>
+                        <button 
+                          onClick={handleUploadClick}
+                          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium relative z-10 cursor-pointer"
+                          style={{ pointerEvents: 'auto' }}
+                        >
+                          Upload Image
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Second Text Input Field - Below image */}
+                    <div style={{ 
+                      width: '688px', 
+                      height: '53px',
+                      maxWidth: '100%',
+                      marginTop: '10px',
+                      border: '2px solid #d1d5db',
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      zIndex: 1000,
+                      pointerEvents: 'auto'
+                    }}>
+                      <textarea
+                        value={secondTextInput}
+                        onChange={(e) => {
+                          let newValue = e.target.value;
+                          
+                          // Limit to 168 characters first
+                          if (newValue.length > 168) {
+                            newValue = newValue.substring(0, 168);
+                          }
+                          
+                          // Limit to 2 lines by counting line breaks
+                          const lineCount = (newValue.match(/\n/g) || []).length + 1;
+                          
+                          if (lineCount <= 2) {
+                            setSecondTextInput(newValue);
+                            
+                            // Update the page content - save to second text position
+                            if (selectedPage && onUpdatePage) {
+                              const currentTexts = selectedPage.content.texts || [];
+                              const updatedTexts = [...currentTexts];
+                              updatedTexts[1] = newValue;
+                              
+                              onUpdatePage(selectedPage.id, {
+                                images: selectedPage.content.images,
+                                texts: updatedTexts
+                              });
+                            }
+                          }
+                        }}
+                        placeholder="Enter text here"
+                        className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
+                        style={{ 
+                          fontFamily: 'Baloo2, sans-serif',
+                          pointerEvents: 'auto',
+                          zIndex: 1001,
+                          lineHeight: '1.2'
+                        }}
+                        autoComplete="off"
+                        rows={2}
+                        maxLength={168}
+                      />
+                    </div>
+                  </div>
+                ) : selectedPage.layout === '2portrait-5text' ? (
+                  <div className="flex flex-col items-center mx-auto">
+                    {/* First Text Input Field - Above image */}
+                    <div style={{ 
+                      width: '688px', 
+                      height: '53px',
+                      maxWidth: '100%',
+                      marginBottom: '15px',
+                      border: '2px solid #d1d5db',
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      zIndex: 1000,
+                      pointerEvents: 'auto'
+                    }}>
+                      <textarea
+                        value={testInput}
+                        onChange={(e) => {
+                          let newValue = e.target.value;
+                          
+                          // Limit to 168 characters first
+                          if (newValue.length > 168) {
+                            newValue = newValue.substring(0, 168);
+                          }
+                          
+                          // Limit to 2 lines by counting line breaks
+                          const lineCount = (newValue.match(/\n/g) || []).length + 1;
+                          
+                          if (lineCount <= 2) {
+                            setTestInput(newValue);
+                            
+                            // Update the page content - save to first text position
+                            if (selectedPage && onUpdatePage) {
+                              const currentTexts = selectedPage.content.texts || [];
+                              const updatedTexts = [...currentTexts];
+                              updatedTexts[0] = newValue;
+                              
+                              onUpdatePage(selectedPage.id, {
+                                images: selectedPage.content.images,
+                                texts: updatedTexts
+                              });
+                            }
+                          }
+                        }}
+                        placeholder="Enter text here"
+                        className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
+                        style={{ 
+                          fontFamily: 'Baloo2, sans-serif',
+                          pointerEvents: 'auto',
+                          zIndex: 1001,
+                          lineHeight: '1.2'
+                        }}
+                        autoComplete="off"
+                        rows={2}
+                        maxLength={168}
+                      />
+                    </div>
+
+                    {/* Images Container - Both images side by side */}
+                    <div className="relative mb-4" style={{ 
+                      width: '800px',
+                      height: '560px'
+                    }}>
+                      {/* First Image Container */}
+                      {selectedPage.content.images.length > 0 ? (
+                        <div className="absolute overflow-hidden border-2 border-transparent" style={{ 
+                          pointerEvents: 'auto',
+                          width: '315px',
+                          height: '560px',
+                          left: '5px',
+                          top: '0px'
+                        }}>
+                          <img 
+                            src={selectedPage.content.images[0]} 
+                            alt="Portrait" 
+                            className="w-full h-full object-cover"
+                            style={{ 
+                              pointerEvents: 'none',
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block'
+                            }}
+                          />
+                          <div className="absolute top-2 right-2 flex gap-2 z-20">
+                            <button
+                              onClick={(e) => handleUploadClick(e, 0)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                              style={{ pointerEvents: 'auto', zIndex: 20 }}
+                            >
+                              Change
+                            </button>
+                            <button
+                              onClick={() => handleDeleteImage(0)}
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors cursor-pointer"
+                              style={{ pointerEvents: 'auto', zIndex: 20 }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="absolute flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors" style={{
+                          width: '315px',
+                          height: '560px',
+                          left: '5px',
+                          top: '0px'
+                        }}>
+                          <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
+                          <button 
+                            onClick={(e) => handleUploadClick(e, 0)}
+                            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium relative z-10 cursor-pointer"
+                            style={{ pointerEvents: 'auto' }}
+                          >
+                            Upload Image
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Second Image Container */}
+                      {selectedPage.content.images.length > 1 ? (
+                        <div className="absolute overflow-hidden border-2 border-transparent" style={{ 
+                          pointerEvents: 'auto',
+                          width: '315px',
+                          height: '560px',
+                          left: '375px',
+                          top: '0px'
+                        }}>
+                          <img 
+                            src={selectedPage.content.images[1]} 
+                            alt="Portrait" 
+                            className="w-full h-full object-cover"
+                            style={{ 
+                              pointerEvents: 'none',
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              display: 'block'
+                            }}
+                          />
+                          <div className="absolute top-2 right-2 flex gap-2 z-20">
+                            <button
+                              onClick={(e) => handleUploadClick(e, 1)}
+                              className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors cursor-pointer"
+                              style={{ pointerEvents: 'auto', zIndex: 20 }}
+                            >
+                              Change
+                            </button>
+                            <button
+                              onClick={() => handleDeleteImage(1)}
+                              className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors cursor-pointer"
+                              style={{ pointerEvents: 'auto', zIndex: 20 }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="absolute flex flex-col items-center justify-center border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors" style={{
+                          width: '315px',
+                          height: '560px',
+                          left: '375px',
+                          top: '0px'
+                        }}>
+                          <h3 className="text-lg font-medium text-gray-600 mb-4">Upload Portrait Image</h3>
+                          <button 
+                            onClick={(e) => handleUploadClick(e, 1)}
+                            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium relative z-10 cursor-pointer"
+                            style={{ pointerEvents: 'auto' }}
+                          >
+                            Upload Image
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Second Text Input Field - Below image */}
+                    <div style={{ 
+                      width: '688px', 
+                      height: '53px',
+                      maxWidth: '100%',
+                      marginTop: '10px',
+                      border: '2px solid #d1d5db',
+                      backgroundColor: 'white',
+                      borderRadius: '6px',
+                      position: 'relative',
+                      zIndex: 1000,
+                      pointerEvents: 'auto'
+                    }}>
+                      <textarea
+                        value={secondTextInput}
+                        onChange={(e) => {
+                          let newValue = e.target.value;
+                          
+                          // Limit to 168 characters first
+                          if (newValue.length > 168) {
+                            newValue = newValue.substring(0, 168);
+                          }
+                          
+                          // Limit to 2 lines by counting line breaks
+                          const lineCount = (newValue.match(/\n/g) || []).length + 1;
+                          
+                          if (lineCount <= 2) {
+                            setSecondTextInput(newValue);
+                            
+                            // Update the page content - save to second text position
+                            if (selectedPage && onUpdatePage) {
+                              const currentTexts = selectedPage.content.texts || [];
+                              const updatedTexts = [...currentTexts];
+                              updatedTexts[1] = newValue;
+                              
+                              onUpdatePage(selectedPage.id, {
+                                images: selectedPage.content.images,
+                                texts: updatedTexts
+                              });
+                            }
+                          }
+                        }}
+                        placeholder="Enter text here"
+                        className="w-full h-full border-none outline-none bg-transparent baloo2-font text-gray-700 text-base text-center focus:outline-none resize-none"
+                        style={{ 
+                          fontFamily: 'Baloo2, sans-serif',
+                          pointerEvents: 'auto',
+                          zIndex: 1001,
+                          lineHeight: '1.2'
+                        }}
+                        autoComplete="off"
+                        rows={2}
+                        maxLength={168}
+                      />
+                    </div>
+                  </div>
                 ) : selectedPage.content.images.length > 0 ? (
                   <div className="mb-3">
                     <div className="text-3xl text-gray-400 mb-1">🖼️</div>
@@ -339,7 +765,7 @@ export default function PageViewer({ selectedPage, pageNumber, onUpdatePage }: P
                   </div>
                 ) : null}
                 
-                {selectedPage.content.texts.length > 0 && selectedPage.layout !== 'portrait-text' && (
+                {selectedPage.content.texts.length > 0 && selectedPage.layout !== 'portrait-text' && selectedPage.layout !== 'landscape-2text' && selectedPage.layout !== '2portrait-5text' && (
                   <div className="mb-3">
                     <div className="text-3xl text-gray-400 mb-1">📝</div>
                     <p className="text-xs text-gray-600">

@@ -142,6 +142,16 @@ export default function BookDesign() {
             images: [],
             texts: []
           };
+        } else if (layout === 'landscape-2text') {
+          updatedPage.content = {
+            images: [],
+            texts: []
+          };
+        } else if (layout === '2portrait-5text') {
+          updatedPage.content = {
+            images: [],
+            texts: []
+          };
         }
         // Add more layout-specific content as needed
         

@@ -1,9 +1,79 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Navigation from '@/components/Navigation'
 import Footer from '@/components/Footer'
+
+// Lazy load heavy components
+const LazyFooter = dynamic(() => import('@/components/Footer'), {
+  loading: () => <div className="h-32 bg-gray-100 animate-pulse" />
+})
+
+// Memoized Image Preview Component for better performance
+const ImagePreview = React.memo(({ image, index, onRemove }: { 
+  image: File, 
+  index: number, 
+  onRemove: (index: number) => void 
+}) => {
+  const [imageUrl, setImageUrl] = useState<string>('')
+  
+  useEffect(() => {
+    const url = URL.createObjectURL(image)
+    setImageUrl(url)
+    
+    return () => {
+      URL.revokeObjectURL(url)
+    }
+  }, [image])
+  
+  return (
+    <div className="relative group">
+      <div className="aspect-square overflow-hidden rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 bg-gray-100">
+        <img
+          src={imageUrl}
+          alt={`Uploaded ${index + 1}`}
+          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+          loading="lazy"
+        />
+      </div>
+      
+      {/* Image number badge */}
+      <div className="absolute top-2 left-2 bg-black bg-opacity-80 text-white text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm">
+        {index + 1}
+      </div>
+      
+      {/* File size indicator */}
+      <div className="absolute bottom-2 left-2 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
+        {(image.size / (1024 * 1024)).toFixed(1)}MB
+      </div>
+      
+      {/* Remove button */}
+      <button
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          onRemove(index)
+        }}
+        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm hover:bg-red-600 transition-all duration-200 shadow-lg z-10 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100"
+        title="Remove image"
+        type="button"
+      >
+        ×
+      </button>
+      
+      {/* Hover overlay with image info */}
+      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 rounded-xl flex items-center justify-center">
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">
+          <div className="text-white text-xs font-semibold">
+            {image.name.length > 15 ? image.name.substring(0, 15) + '...' : image.name}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+})
 
 export default function Design() {
   const [currentStep, setCurrentStep] = useState(1)
@@ -16,22 +86,36 @@ export default function Design() {
   const [selectedPrice, setSelectedPrice] = useState('199 AED')
   const [uploadError, setUploadError] = useState('')
   const [pageCountError, setPageCountError] = useState('')
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    // Cache settings to avoid repeated fetches
+    const cachedSettings = sessionStorage.getItem('pixory-settings')
+    if (cachedSettings) {
       try {
-        const response = await fetch('/data/settings.json')
-        const settings = await response.json()
+        const settings = JSON.parse(cachedSettings)
         setShowLabels(settings.showSectionLabels)
-      } catch (error) {
-        console.error('Error fetching settings:', error)
+      } catch {
         setShowLabels(true)
       }
+    } else {
+      const fetchSettings = async () => {
+        try {
+          const response = await fetch('/data/settings.json')
+          const settings = await response.json()
+          sessionStorage.setItem('pixory-settings', JSON.stringify(settings))
+          setShowLabels(settings.showSectionLabels)
+        } catch (error) {
+          console.error('Error fetching settings:', error)
+          setShowLabels(true)
+        }
+      }
+      fetchSettings()
     }
-
-    fetchSettings()
   }, [])
 
   // Read URL parameters and set minimum images based on page count
@@ -53,53 +137,114 @@ export default function Design() {
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || [])
+    processFiles(files)
+    event.target.value = ''
+  }
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault()
+    setIsDragOver(false)
+  }
+
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault()
+    setIsDragOver(false)
+    const files = Array.from(event.dataTransfer.files).filter(file => 
+      file.type.startsWith('image/')
+    )
+    processFiles(files)
+  }
+
+  const processFiles = async (files: File[]) => {
+    if (files.length === 0) return
+
+    setIsUploading(true)
+    setUploadProgress(0)
+    setUploadError('')
+
     const currentCount = uploadedImages.length
     const newTotal = currentCount + files.length
-    
-    // Clear any previous error
-    setUploadError('')
     
     // Check if adding these files would exceed the minimum requirement
     if (currentCount >= minImages) {
       setUploadError(`You have already uploaded ${currentCount} images, which meets the minimum requirement of ${minImages} images. Please delete some images first if you want to upload different ones.`)
-      event.target.value = ''
+      setIsUploading(false)
       return
     }
     
     // Check if adding these files would exceed the minimum requirement
     if (newTotal > minImages) {
       const allowedFiles = files.slice(0, minImages - currentCount)
-      setUploadedImages(prev => [...prev, ...allowedFiles])
+      await processImageFiles(allowedFiles)
       setUploadError(`You tried to upload ${files.length} images, but you can only add ${allowedFiles.length} more images to reach the minimum requirement of ${minImages} images. Please delete some images first if you want to upload different ones.`)
-      event.target.value = ''
-      return
+    } else {
+      await processImageFiles(files)
     }
     
-    setUploadedImages(prev => [...prev, ...files])
-    // Clear the input to allow uploading the same file again
-    event.target.value = ''
+    setIsUploading(false)
+    setUploadProgress(0)
   }
 
-  const removeImage = (index: number) => {
-    console.log('Removing image at index:', index)
-    setUploadedImages(prev => {
-      const newImages = prev.filter((_, i) => i !== index)
-      console.log('New images array length:', newImages.length)
-      return newImages
-    })
-  }
+  const processImageFiles = useCallback(async (files: File[]) => {
+    const processedFiles: File[] = []
+    
+    // Process files in batches to avoid blocking the UI
+    const batchSize = 5
+    for (let i = 0; i < files.length; i += batchSize) {
+      const batch = files.slice(i, i + batchSize)
+      
+      const batchPromises = batch.map(async (file, batchIndex) => {
+        // Basic image validation
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          setUploadError(`Image "${file.name}" is too large. Please use images smaller than 10MB.`)
+          return null
+        }
+        
+        // Minimal processing delay
+        await new Promise(resolve => setTimeout(resolve, 50))
+        return file
+      })
+      
+      const batchResults = await Promise.all(batchPromises)
+      const validFiles = batchResults.filter(file => file !== null) as File[]
+      processedFiles.push(...validFiles)
+      
+      // Update progress
+      setUploadProgress(((i + batchSize) / files.length) * 100)
+    }
+    
+    setUploadedImages(prev => [...prev, ...processedFiles])
+  }, [])
 
-  const nextStep = () => {
+  const removeImage = useCallback((index: number) => {
+    setUploadedImages(prev => prev.filter((_, i) => i !== index))
+  }, [])
+
+  // Memoized calculations for better performance
+  const progressPercentage = useMemo(() => {
+    return Math.round((uploadedImages.length / minImages) * 100)
+  }, [uploadedImages.length, minImages])
+
+  const isUploadComplete = useMemo(() => {
+    return uploadedImages.length >= minImages
+  }, [uploadedImages.length, minImages])
+
+  const nextStep = useCallback(() => {
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1)
     }
-  }
+  }, [currentStep])
 
-  const prevStep = () => {
+  const prevStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
     }
-  }
+  }, [currentStep])
 
   return (
     <main className="min-h-screen">
@@ -180,57 +325,115 @@ export default function Design() {
               </div>
 
               {/* Upload Area */}
-              <div className={`border-2 border-dashed rounded-lg p-8 text-center mb-6 ${
-                uploadedImages.length >= minImages 
-                  ? 'border-green-300 bg-green-50' 
-                  : 'border-gray-300'
-              }`}>
-                <div className={`w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center ${
+              <div 
+                className={`border-2 border-dashed rounded-xl p-12 text-center mb-6 transition-all duration-300 ${
                   uploadedImages.length >= minImages 
-                    ? 'bg-green-100' 
-                    : 'bg-gray-100'
+                    ? 'border-green-300 bg-green-50' 
+                    : isDragOver
+                    ? 'border-blue-400 bg-blue-50 scale-105'
+                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <div className={`w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center transition-all duration-300 ${
+                  uploadedImages.length >= minImages 
+                    ? 'bg-green-100 scale-110' 
+                    : isDragOver
+                    ? 'bg-blue-100 scale-110'
+                    : 'bg-gray-100 hover:bg-gray-200'
                 }`}>
-                  {uploadedImages.length >= minImages ? (
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isUploading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  ) : uploadedImages.length >= minImages ? (
+                    <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   ) : (
-                    <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <svg className="w-10 h-10 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                   )}
                 </div>
                 
-                {uploadedImages.length >= minImages ? (
+                {isUploading ? (
+                  <>
+                    <h3 className="text-xl font-semibold text-blue-800 mb-2">Processing Images...</h3>
+                    <p className="text-blue-600 mb-4">
+                      Please wait while we process your images
+                    </p>
+                    <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+                      <div 
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <div className="text-sm text-blue-700 font-medium">
+                      {Math.round(uploadProgress)}% complete
+                    </div>
+                  </>
+                ) : uploadedImages.length >= minImages ? (
                   <>
                     <h3 className="text-xl font-semibold text-green-800 mb-2">Upload Complete!</h3>
                     <p className="text-green-600 mb-4">
                       You have uploaded {uploadedImages.length} images. This meets the minimum requirement for your {selectedPageCount}-page photobook.
                     </p>
-                    <div className="text-sm text-green-700 font-medium">
+                    <div className="text-sm text-green-700 font-medium mb-4">
                       ✓ Ready to proceed to the next step
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-xl font-semibold text-black mb-2">Upload Your Photos</h3>
-                    <p className="text-gray-600 mb-4">
-                      Upload at least {minImages} images for your {selectedPageCount}-page photobook. Pages will be blank if you don't upload enough images.
-                    </p>
                     <input
                       type="file"
                       multiple
                       accept="image/*"
                       onChange={handleImageUpload}
                       className="hidden"
-                      id="image-upload"
+                      id="image-upload-more"
                     />
                     <label
-                      htmlFor="image-upload"
-                      className="bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors cursor-pointer inline-block"
+                      htmlFor="image-upload-more"
+                      className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors cursor-pointer inline-block mr-3"
                     >
-                      Choose Images
+                      Add More Images
                     </label>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-2xl font-bold text-black mb-3">Upload Your Photos</h3>
+                    <p className="text-gray-600 mb-6 text-lg">
+                      Drag and drop your images here or click to browse
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Upload at least <span className="font-semibold text-black">{minImages} images</span> for your {selectedPageCount}-page photobook
+                    </p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <label
+                        htmlFor="image-upload"
+                        className="bg-black text-white px-8 py-4 rounded-lg font-semibold hover:bg-gray-800 transition-all duration-200 cursor-pointer inline-flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Choose Images
+                      </label>
+                      
+                      <div className="text-gray-400 text-sm">
+                        or drag & drop here
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 text-xs text-gray-400">
+                      Supported formats: JPG, PNG, GIF • Max size: 10MB per image
+                    </div>
                   </>
                 )}
               </div>
@@ -289,71 +492,72 @@ export default function Design() {
 
               {/* Uploaded Images Preview */}
               {uploadedImages.length > 0 && (
-                <div className="mb-6">
+                <div className="mb-8">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-semibold text-black">
-                      Uploaded Images
-                    </h3>
-                    <div className="flex items-center space-x-2">
-                      <div className="text-sm text-gray-600">
-                        {uploadedImages.length} / {minImages} minimum
+                    <div className="flex items-center space-x-4">
+                      <h3 className="text-2xl font-bold text-black">
+                        Your Images
+                      </h3>
+                      <div className="flex items-center space-x-2 bg-gray-100 px-3 py-1 rounded-full">
+                        <div className="text-sm font-semibold text-gray-700">
+                          {uploadedImages.length} / {minImages}
+                        </div>
+                        <div className={`w-2 h-2 rounded-full ${
+                          uploadedImages.length >= minImages ? 'bg-green-500' : 'bg-yellow-500'
+                        }`}></div>
                       </div>
-                      <div className={`w-3 h-3 rounded-full ${
-                        uploadedImages.length >= minImages ? 'bg-green-500' : 'bg-yellow-500'
-                      }`}></div>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={() => {
+                          const input = document.getElementById('image-upload') as HTMLInputElement
+                          input?.click()
+                        }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                      >
+                        Add More
+                      </button>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                     {uploadedImages.map((image, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                          <img
-                            src={URL.createObjectURL(image)}
-                            alt={`Uploaded ${index + 1}`}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                          />
-                        </div>
-                        
-                        {/* Image number badge */}
-                        <div className="absolute top-2 left-2 bg-black bg-opacity-70 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                          {index + 1}
-                        </div>
-                        
-                        {/* Remove button */}
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            removeImage(index)
-                          }}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors duration-200 shadow-md z-10"
-                          title="Remove image"
-                          type="button"
-                        >
-                          ×
-                        </button>
-                        
-                        {/* Hover overlay */}
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-200 rounded-lg"></div>
-                      </div>
+                      <ImagePreview 
+                        key={`${image.name}-${index}`}
+                        image={image}
+                        index={index}
+                        onRemove={removeImage}
+                      />
                     ))}
                   </div>
                   
-                  {/* Progress indicator */}
-                  <div className="mt-4">
-                    <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-                      <span>Progress</span>
-                      <span>{Math.round((uploadedImages.length / minImages) * 100)}%</span>
+                  {/* Enhanced Progress indicator */}
+                  <div className="mt-6 bg-gray-50 rounded-xl p-4">
+                    <div className="flex items-center justify-between text-sm text-gray-700 mb-3">
+                      <span className="font-semibold">Upload Progress</span>
+                      <span className="font-bold text-lg">
+                        {progressPercentage}%
+                      </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                          uploadedImages.length >= minImages ? 'bg-green-500' : 'bg-blue-500'
+                        className={`h-3 rounded-full transition-all duration-500 ${
+                          isUploadComplete
+                            ? 'bg-gradient-to-r from-green-500 to-green-600' 
+                            : 'bg-gradient-to-r from-blue-500 to-blue-600'
                         }`}
-                        style={{ width: `${Math.min((uploadedImages.length / minImages) * 100, 100)}%` }}
+                        style={{ width: `${Math.min(progressPercentage, 100)}%` }}
                       ></div>
                     </div>
+                    
+                    {uploadedImages.length < minImages && (
+                      <div className="mt-3 text-center">
+                        <span className="text-sm text-gray-600">
+                          {minImages - uploadedImages.length} more images needed
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -476,7 +680,7 @@ export default function Design() {
         )}
       </section>
       
-      <Footer />
+      <LazyFooter />
     </main>
   )
 }
